@@ -1,0 +1,17 @@
+{
+  "short_name": "Revizio",
+  "name": "Revizio",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "./index.html",
+  "background_color": "#0284c7",
+  "theme_color": "#0284c7",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "lang": "rm"
+}
