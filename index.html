@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <title>Verificări & Revizii Gaze</title>
+  
+  <!-- Configurații iOS / PWA -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Gaze Track">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1041/1041883.png">
+
+  <!-- Tailwind CSS & Font & Canvas Confetti -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', 'sans-serif'],
+          },
+          colors: {
+            iosBg: '#F2F2F7',
+            iosCard: '#FFFFFF',
+            darkSlate: '#0f172a',
+            gasBlue: '#007AFF',
+            gasOrange: '#FF9500',
+            gasGreen: '#34C759',
+            gasEmerald: '#10B981',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #F2F2F7;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .pb-safe {
+      padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    }
+    .pt-safe {
+      padding-top: max(1rem, env(safe-area-inset-top));
+    }
+    .sheet-transform {
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+  </style>
+</head>
+<body class="text-gray-900 antialiased flex flex-col min-h-screen">
+
+  <!-- TOP HEADER / STATUS BAR SAFE AREA -->
+  <header class="pt-safe bg-iosBg sticky top-0 z-10 px-4 pb-2 border-b border-gray-200/50 backdrop-blur-md bg-iosBg/80">
+    <div class="max-w-md mx-auto flex items-center justify-between">
+      <h1 class="text-xl font-bold tracking-tight text-gray-900">Verificări Gaze</h1>
+      <span id="currentDateDisplay" class="text-xs font-semibold text-gray-500 bg-gray-200/70 px-2.5 py-1 rounded-full"></span>
+    </div>
+  </header>
+
+  <!-- CONTENT CONTAINER -->
+  <main class="flex-1 max-w-md w-full mx-auto px-4 py-4 mb-20 space-y-4">
+    
+    <!-- DASHBOARD VIEW -->
+    <div id="dashboardView" class="space-y-4">
+      
+      <!-- HERO PROGRESS CARD -->
+      <div id="progressCard" class="bg-darkSlate text-white rounded-3xl p-5 shadow-xl relative overflow-hidden transition-all duration-300">
+        <div class="flex justify-between items-start mb-2">
+          <div>
+            <span class="text-xs font-medium uppercase tracking-wider text-slate-400">Progres Zilnic (fără TVA)</span>
+            <div class="flex items-baseline gap-1 mt-1">
+              <span id="todayAchievedText" class="text-3xl font-extrabold tracking-tight">0</span>
+              <span class="text-sm font-semibold text-slate-400">RON</span>
+            </div>
+          </div>
+          <button onclick="openTargetModal()" class="bg-slate-800/80 hover:bg-slate-700 text-xs px-3 py-1.5 rounded-full border border-slate-700 flex items-center gap-1">
+            <span>Target: <strong id="currentTargetText">1500</strong> RON</span>
+            <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+          </button>
+        </div>
+
+        <!-- TARGET REACHED BADGE -->
+        <div id="targetBadge" class="hidden my-2 inline-flex items-center gap-1.5 bg-gasGreen/20 text-gasGreen border border-gasGreen/30 px-3 py-1 rounded-full text-xs font-bold animate-pulse">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+          Target atins!
+        </div>
+
+        <!-- PROGRESS BAR -->
+        <div class="w-full bg-slate-800 h-3.5 rounded-full overflow-hidden my-3 p-0.5 border border-slate-700/50">
+          <div id="progressBar" class="bg-gasBlue h-full rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
+        </div>
+
+        <div class="flex justify-between text-xs font-medium text-slate-400">
+          <span id="percentageText">0% realizat</span>
+          <span id="remainingText">1500 RON rămas</span>
+        </div>
+      </div>
+
+      <!-- MAIN QUICK ACTIONS -->
+      <div class="grid grid-cols-2 gap-3">
+        <!-- MATERIALE BUTTON CARD -->
+        <button onclick="openMaterialsSheet()" class="bg-iosCard p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between text-left active:scale-98 transition-transform">
+          <div class="w-10 h-10 rounded-xl bg-blue-50 text-gasBlue flex items-center justify-center mb-3">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+          </div>
+          <div>
+            <h2 class="font-bold text-gray-900 leading-snug">Materiale</h2>
+            <p class="text-[11px] text-gray-500 mt-0.5 leading-tight">Verificare, Revizie, Detectoare</p>
+          </div>
+        </button>
+
+        <!-- SERVEXPRESS CARD -->
+        <button onclick="addServexpress()" class="bg-iosCard p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between text-left active:scale-98 transition-transform relative overflow-hidden group">
+          <div class="w-10 h-10 rounded-xl bg-orange-50 text-gasOrange flex items-center justify-center mb-3">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+          </div>
+          <div>
+            <div class="flex justify-between items-center">
+              <h2 class="font-bold text-gray-900">Servexpress</h2>
+            </div>
+            <p class="text-xs font-semibold text-gray-500 mt-0.5">190 RON <span class="text-[10px] text-gray-400 font-normal">(157.02 ex. TVA)</span></p>
+          </div>
+        </button>
+      </div>
+
+      <!-- TODAY'S EXECUTIONS SECTION -->
+      <div class="bg-iosCard rounded-2xl p-4 shadow-sm border border-gray-100">
+        <h3 class="font-bold text-gray-900 text-sm mb-3 flex items-center justify-between">
+          <span>Adăugate astăzi</span>
+          <span id="todayCountBadge" class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-medium">0</span>
+        </h3>
+        <div id="todayList" class="space-y-2.5">
+          <!-- Execuțiile de azi vor fi randate dinamic -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- VENITURI VIEW (HIDDEN BY DEFAULT) -->
+    <div id="venituriView" class="space-y-4 hidden">
+      
+      <!-- TOTAL EARNINGS CARD -->
+      <div class="bg-iosCard p-5 rounded-2xl shadow-sm border border-gray-100">
+        <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Venit total înregistrat (fără TVA)</span>
+        <div class="flex items-baseline gap-1 mt-1">
+          <span id="totalEarningsText" class="text-3xl font-extrabold text-gray-900">0</span>
+          <span class="text-sm font-bold text-gray-500">RON</span>
+        </div>
+      </div>
+
+      <!-- CALENDAR / DATE PICKER SECTION -->
+      <div class="bg-iosCard p-4 rounded-2xl shadow-sm border border-gray-100 space-y-3">
+        <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider">Selectează Data</label>
+        <input type="date" id="historyDatePicker" onchange="loadHistoryDate()" class="w-full bg-gray-50 border border-gray-200 text-gray-900 font-medium rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-gasBlue">
+
+        <div id="historySummary" class="hidden bg-gray-50 p-3 rounded-xl flex justify-between items-center text-xs font-semibold border border-gray-100">
+          <div>Execuții: <span id="historyCount" class="text-gray-900 font-bold">0</span></div>
+          <div>Total zi: <span id="historyTotal" class="text-gasBlue font-bold">0 RON</span></div>
+        </div>
+
+        <div id="historyList" class="space-y-2 pt-1">
+          <!-- Execuțiile din data selectată vor apărea aici -->
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- MATERIALE POPUP / BOTTOM SHEET -->
+  <div id="materialsOverlay" onclick="closeMaterialsSheet()" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300"></div>
+  
+  <div id="materialsSheet" class="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md mx-auto shadow-2xl sheet-transform translate-y-full pb-safe flex flex-col max-h-[85vh]">
+    <!-- HANDLE -->
+    <div class="w-12 h-1.5 bg-gray-300 rounded-full mx-auto my-3 flex-shrink-0"></div>
+    
+    <div class="px-5 pb-3 flex justify-between items-center border-b border-gray-100 flex-shrink-0">
+      <h3 class="text-lg font-bold text-gray-900">Materiale & Servicii</h3>
+      <button onclick="closeMaterialsSheet()" class="w-7 h-7 bg-gray-100 text-gray-500 rounded-full flex items-center justify-center font-bold text-sm">✕</button>
+    </div>
+
+    <!-- TABS -->
+    <div class="flex p-2 bg-gray-100 rounded-xl mx-5 my-3 gap-1 flex-shrink-0 text-xs font-semibold text-gray-600">
+      <button id="tabVerificare" onclick="switchTab('Verificare')" class="flex-1 py-2 rounded-lg transition-colors bg-white text-gray-900 shadow-sm">Verificare</button>
+      <button id="tabRevizie" onclick="switchTab('Revizie')" class="flex-1 py-2 rounded-lg transition-colors">Revizie</button>
+      <button id="tabEchipament" onclick="switchTab('Echipament')" class="flex-1 py-2 rounded-lg transition-colors">Detectoare</button>
+    </div>
+
+    <!-- SERVICE LIST (SCROLLABLE) -->
+    <div id="materialsContent" class="overflow-y-auto px-5 pb-6 space-y-2.5 flex-1">
+      <!-- Item-urile se vor randa dinamic aici -->
+    </div>
+  </div>
+
+  <!-- TARGET MODAL -->
+  <div id="targetOverlay" onclick="closeTargetModal()" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 hidden"></div>
+  <div id="targetModal" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-xs bg-white rounded-2xl p-5 shadow-2xl z-50 hidden">
+    <h3 class="font-bold text-gray-900 mb-2">Setează Target Zilnic</h3>
+    <p class="text-xs text-gray-500 mb-4">Alege valoarea de referință în RON pentru progresul tău zilnic.</p>
+    <input type="number" id="targetInput" class="w-full bg-gray-100 border border-gray-200 rounded-xl p-3 text-lg font-bold text-gray-900 mb-4 focus:outline-none focus:ring-2 focus:ring-gasBlue">
+    <div class="flex gap-2">
+      <button onclick="closeTargetModal()" class="flex-1 py-2.5 bg-gray-100 text-gray-700 font-semibold text-sm rounded-xl">Anulează</button>
+      <button onclick="saveTarget()" class="flex-1 py-2.5 bg-gasBlue text-white font-semibold text-sm rounded-xl">Salvează</button>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAVIGATION -->
+  <nav class="fixed bottom-0 left-0 right-0 bg-iosCard/90 backdrop-blur-md border-t border-gray-200/80 z-30 pb-safe">
+    <div class="max-w-md mx-auto flex justify-around py-2">
+      <button id="navDashboard" onclick="switchView('dashboard')" class="flex flex-col items-center gap-1 text-gasBlue">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l1.293 1.293a1 1 0 001.414-1.414l-7-7z"></path></svg>
+        <span class="text-[10px] font-medium">Dashboard</span>
+      </button>
+      <button id="navVenituri" onclick="switchView('venituri')" class="flex flex-col items-center gap-1 text-gray-400">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"></path></svg>
+        <span class="text-[10px] font-medium">Venituri</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    const VAT_RATE = 1.21;
+
+    const catalogData = {
+      Verificare: [
+        { name: "Verificare inspectie IU 1PDA", priceVat: 190 },
+        { name: "Verificare inspectie IU 2PDA", priceVat: 230 },
+        { name: "Verificare inspectie IU 3PDA", priceVat: 300 },
+        { name: "Verificare inspectie IU 4+ PDA", priceVat: 380 },
+      ],
+      Revizie: [
+        { name: "Revizie - Inspectie IU 1 PDA", priceVat: 230 },
+        { name: "Revizie Inspectie IU 2 PDA", priceVat: 290 },
+        { name: "Revizie Inspectie IU 3 PDA", priceVat: 375 },
+        { name: "Revizie inspectie IU 4+ PDA", priceVat: 480 },
+      ],
+      Echipament: [
+        { name: "Detector HD100 PRO Double Control", priceVat: 310 },
+        { name: "Detector Homplex HD300 PRO", priceVat: 485 },
+      ]
+    };
+
+    let state = {
+      target: 1500,
+      executions: [],
+      activeTab: 'Verificare'
+    };
+
+    function initApp() {
+      loadState();
+      updateDateDisplay();
+      renderDashboard();
+      initHistoryDatePicker();
+      registerSW();
+    }
+
+    function getTodayString() {
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function formatNumber(num) {
+      return Number(num).toLocaleString('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function updateDateDisplay() {
+      const options = { weekday: 'short', day: 'numeric', month: 'short' };
+      document.getElementById('currentDateDisplay').innerText = new Date().toLocaleDateString('ro-RO', options);
+    }
+
+    function saveState() {
+      localStorage.setItem('gaze_app_state', JSON.stringify(state));
+    }
+
+    function loadState() {
+      const saved = localStorage.getItem('gaze_app_state');
+      if (saved) {
+        try {
+          state = JSON.parse(saved);
+          if (!state.executions) state.executions = [];
+          if (!state.target) state.target = 1500;
+        } catch (e) {
+          console.error("Failed to load state", e);
+        }
+      }
+    }
+
+    function renderDashboard() {
+      const todayStr = getTodayString();
+      const todayExecs = state.executions.filter(e => e.date === todayStr);
+      
+      const todayAchieved = todayExecs.reduce((sum, item) => sum + item.amountNoVat, 0);
+      const target = state.target;
+      const percentage = Math.min(Math.round((todayAchieved / target) * 100), 100);
+      const remaining = Math.max(target - todayAchieved, 0);
+
+      document.getElementById('todayAchievedText').innerText = formatNumber(todayAchieved);
+      document.getElementById('currentTargetText').innerText = target;
+      document.getElementById('percentageText').innerText = `${percentage}% realizat`;
+      document.getElementById('remainingText').innerText = `${formatNumber(remaining)} RON rămas`;
+
+      const progressBar = document.getElementById('progressBar');
+      const targetBadge = document.getElementById('targetBadge');
+      
+      progressBar.style.width = `${percentage}%`;
+
+      if (todayAchieved >= target && target > 0) {
+        progressBar.classList.remove('bg-gasBlue');
+        progressBar.classList.add('bg-gasGreen');
+        targetBadge.classList.remove('hidden');
+      } else {
+        progressBar.classList.remove('bg-gasGreen');
+        progressBar.classList.add('bg-gasBlue');
+        targetBadge.classList.add('hidden');
+      }
+
+      const todayList = document.getElementById('todayList');
+      document.getElementById('todayCountBadge').innerText = todayExecs.length;
+
+      if (todayExecs.length === 0) {
+        todayList.innerHTML = `<div class="text-center py-6 text-xs text-gray-400">Nu ai adăugat nicio execuție astăzi.</div>`;
+      } else {
+        todayList.innerHTML = todayExecs.slice().reverse().map(item => `
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
+            <div>
+              <div class="text-xs font-bold text-gray-900">${item.name}</div>
+              <div class="text-[11px] text-gasBlue font-semibold">+${formatNumber(item.amountNoVat)} RON <span class="text-[10px] text-gray-400 font-normal">(fără TVA)</span></div>
+            </div>
+            <button onclick="deleteExecution('${item.id}')" class="text-gray-400 hover:text-red-500 p-1.5 transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            </button>
+          </div>
+        `).join('');
+      }
+
+      const totalAllTime = state.executions.reduce((sum, item) => sum + item.amountNoVat, 0);
+      document.getElementById('totalEarningsText').innerText = formatNumber(totalAllTime);
+    }
+
+    function addExecution(name, priceVat) {
+      const amountNoVat = priceVat / VAT_RATE;
+      const prevAchieved = state.executions
+        .filter(e => e.date === getTodayString())
+        .reduce((sum, item) => sum + item.amountNoVat, 0);
+
+      const newExecution = {
+        id: Date.now().toString(),
+        name: name,
+        priceVat: priceVat,
+        amountNoVat: amountNoVat,
+        date: getTodayString(),
+        timestamp: Date.now()
+      };
+
+      state.executions.push(newExecution);
+      saveState();
+      renderDashboard();
+
+      const newAchieved = prevAchieved + amountNoVat;
+      if (prevAchieved < state.target && newAchieved >= state.target) {
+        triggerCelebration();
+      }
+
+      closeMaterialsSheet();
+    }
+
+    function addServexpress() {
+      addExecution("Servexpress", 190);
+    }
+
+    function deleteExecution(id) {
+      state.executions = state.executions.filter(e => e.id !== id);
+      saveState();
+      renderDashboard();
+      
+      const picker = document.getElementById('historyDatePicker');
+      if (picker.value) {
+        loadHistoryDate();
+      }
+    }
+
+    function triggerCelebration() {
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 80,
+          spread: 60,
+          origin: { y: 0.7 }
+        });
+      }
+    }
+
+    function switchTab(tab) {
+      state.activeTab = tab;
+      ['Verificare', 'Revizie', 'Echipament'].forEach(t => {
+        const btn = document.getElementById(`tab${t}`);
+        if (t === tab) {
+          btn.className = "flex-1 py-2 rounded-lg transition-colors bg-white text-gray-900 shadow-sm font-bold";
+        } else {
+          btn.className = "flex-1 py-2 rounded-lg transition-colors text-gray-500 font-semibold";
+        }
+      });
+
+      renderMaterialsList();
+    }
+
+    function renderMaterialsList() {
+      const container = document.getElementById('materialsContent');
+      const items = catalogData[state.activeTab] || [];
+
+      container.innerHTML = items.map(item => {
+        const priceNoVat = item.priceVat / VAT_RATE;
+        return `
+          <button onclick="addExecution('${item.name}', ${item.priceVat})" class="w-full text-left p-3.5 bg-gray-50 hover:bg-blue-50/50 rounded-2xl border border-gray-100 flex items-center justify-between transition-colors active:scale-98">
+            <div>
+              <div class="text-xs font-bold text-gray-900">${item.name}</div>
+              <div class="text-[11px] text-gray-500 mt-0.5">Fără TVA: <strong class="text-gasBlue">${formatNumber(priceNoVat)} RON</strong></div>
+            </div>
+            <div class="text-right">
+              <span class="text-sm font-extrabold text-gray-900">${item.priceVat} RON</span>
+              <span class="block text-[10px] text-gray-400">cu TVA</span>
+            </div>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function openMaterialsSheet() {
+      renderMaterialsList();
+      document.getElementById('materialsOverlay').classList.remove('hidden');
+      setTimeout(() => {
+        document.getElementById('materialsOverlay').classList.remove('opacity-0');
+        document.getElementById('materialsSheet').classList.remove('translate-y-full');
+      }, 10);
+    }
+
+    function closeMaterialsSheet() {
+      document.getElementById('materialsSheet').classList.add('translate-y-full');
+      document.getElementById('materialsOverlay').classList.add('opacity-0');
+      setTimeout(() => {
+        document.getElementById('materialsOverlay').classList.add('hidden');
+      }, 300);
+    }
+
+    function openTargetModal() {
+      document.getElementById('targetInput').value = state.target;
+      document.getElementById('targetOverlay').classList.remove('hidden');
+      document.getElementById('targetModal').classList.remove('hidden');
+    }
+
+    function closeTargetModal() {
+      document.getElementById('targetOverlay').classList.add('hidden');
+      document.getElementById('targetModal').classList.add('hidden');
+    }
+
+    function saveTarget() {
+      const val = parseFloat(document.getElementById('targetInput').value);
+      if (val && val > 0) {
+        state.target = val;
+        saveState();
+        renderDashboard();
+        closeTargetModal();
+      }
+    }
+
+    function switchView(view) {
+      const dashView = document.getElementById('dashboardView');
+      const venView = document.getElementById('venituriView');
+      const navDash = document.getElementById('navDashboard');
+      const navVen = document.getElementById('navVenituri');
+
+      if (view === 'dashboard') {
+        dashView.classList.remove('hidden');
+        venView.classList.add('hidden');
+        navDash.className = "flex flex-col items-center gap-1 text-gasBlue";
+        navVen.className = "flex flex-col items-center gap-1 text-gray-400";
+      } else {
+        dashView.classList.add('hidden');
+        venView.classList.remove('hidden');
+        navDash.className = "flex flex-col items-center gap-1 text-gray-400";
+        navVen.className = "flex flex-col items-center gap-1 text-gasBlue";
+        loadHistoryDate();
+      }
+    }
+
+    function initHistoryDatePicker() {
+      const picker = document.getElementById('historyDatePicker');
+      picker.value = getTodayString();
+    }
+
+    function loadHistoryDate() {
+      const picker = document.getElementById('historyDatePicker');
+      const selectedDate = picker.value;
+      const listContainer = document.getElementById('historyList');
+      const summaryContainer = document.getElementById('historySummary');
+
+      if (!selectedDate) return;
+
+      const filtered = state.executions.filter(e => e.date === selectedDate);
+      summaryContainer.classList.remove('hidden');
+
+      const dayTotal = filtered.reduce((sum, item) => sum + item.amountNoVat, 0);
+      document.getElementById('historyCount').innerText = filtered.length;
+      document.getElementById('historyTotal').innerText = `${formatNumber(dayTotal)} RON`;
+
+      if (filtered.length === 0) {
+        listContainer.innerHTML = `<div class="text-center py-6 text-xs text-gray-400">Nu există execuții pentru această dată.</div>`;
+      } else {
+        listContainer.innerHTML = filtered.slice().reverse().map(item => `
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
+            <div>
+              <div class="text-xs font-bold text-gray-900">${item.name}</div>
+              <div class="text-[11px] text-gasBlue font-semibold">+${formatNumber(item.amountNoVat)} RON</div>
+            </div>
+            <button onclick="deleteExecution('${item.id}')" class="text-gray-400 hover:text-red-500 p-1.5 transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            </button>
+          </div>
+        `).join('');
+      }
+    }
+
+    function registerSW() {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').catch(err => console.log("SW reg failed", err));
+      }
+    }
+
+    window.onload = initApp;
+  </script>
+</body>
+</html>
