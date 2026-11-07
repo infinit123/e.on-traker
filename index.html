@@ -1,756 +1,95 @@
-<!DOCTYPE html>
-<html lang="ro" class="dark">
+<!doctype html>
+<html lang="ro" data-theme="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-  <title>Revizio - Instalații Gaze</title>
-  
-  <!-- Configurații iOS / PWA -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#07111f">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#eef4fb">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Revizio">
-  <meta name="theme-color" content="#030712">
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icon.png">
-
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Canvas Confetti -->
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <!-- SF Pro / Inter Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=SF+Pro+Display:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', 'sans-serif'],
-          },
-          colors: {
-            cyberDark: '#030712',
-            cyberCardDark: 'rgba(17, 24, 39, 0.75)',
-            cyberBorderDark: 'rgba(255, 255, 255, 0.08)',
-            cyberLightBg: '#F1F5F9',
-            cyberLightCard: 'rgba(255, 255, 255, 0.85)',
-            revBlue: '#0A84FF',
-            revCyan: '#30B0C7',
-            revGreen: '#30D158',
-            revOrange: '#FF9F0A',
-            revPurple: '#BF5AF2',
-          },
-          boxShadow: {
-            'glow-blue': '0 0 25px -5px rgba(10, 132, 255, 0.4)',
-            'glow-cyan': '0 0 25px -5px rgba(48, 176, 199, 0.4)',
-            'glow-green': '0 0 25px -5px rgba(48, 209, 88, 0.4)',
-            'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
-          }
-        }
-      }
-    }
-  </script>
-
-  <style>
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
-    }
-
-    body {
-      touch-action: manipulation;
-      overflow-x: hidden;
-      width: 100vw;
-    }
-
-    .pb-safe { padding-bottom: max(1.25rem, env(safe-area-inset-bottom)); }
-    .pt-safe { padding-top: max(1rem, env(safe-area-inset-top)); }
-
-    /* VisionOS Glassmorphism */
-    .glass-panel-dark {
-      background: rgba(15, 23, 42, 0.7);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .glass-panel-light {
-      background: rgba(255, 255, 255, 0.82);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.6);
-    }
-
-    /* Spring micro-interactions for touch */
-    .touch-bounce {
-      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.15s ease, box-shadow 0.2s ease;
-    }
-    .touch-bounce:active {
-      transform: scale(0.95);
-      opacity: 0.88;
-    }
-
-    .sheet-transition {
-      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    /* Custom Futuristic Date Input styling to prevent iPhone overflow */
-    .date-picker-wrapper {
-      position: relative;
-      width: 100%;
-      overflow: hidden;
-    }
-
-    input[type="date"]::-webkit-calendar-picker-indicator {
-      background: transparent;
-      bottom: 0;
-      color: transparent;
-      cursor: pointer;
-      height: auto;
-      left: 0;
-      position: absolute;
-      right: 0;
-      top: 0;
-      width: auto;
-    }
-
-    /* Shimmer Text Animation */
-    @keyframes shimmer {
-      0% { background-position: -200% 0; }
-      100% { background-position: 200% 0; }
-    }
-
-    .shimmer-text {
-      background: linear-gradient(90deg, #38BDF8 0%, #A855F7 50%, #30D158 100%);
-      background-size: 200% auto;
-      color: transparent;
-      -webkit-background-clip: text;
-      animation: shimmer 4s linear infinite;
-    }
-
-    /* Custom Scrollbar hiding */
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-  </style>
+  <meta name="format-detection" content="telephone=no">
+  <meta name="revizio-version" content="2.0.1-rebuild">
+  <title>Revizio</title>
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+  <link rel="icon" sizes="192x192" href="./icon-192.png">
+  <link rel="stylesheet" href="./app.css">
 </head>
-<body class="bg-cyberLightBg dark:bg-cyberDark text-slate-900 dark:text-slate-100 antialiased flex flex-col min-h-screen transition-colors duration-500 selection:bg-blue-500 selection:text-white">
+<body>
+  <div class="ambient" aria-hidden="true"></div>
+  <div id="updateToast" class="update-toast hidden" role="status"><div><strong>Actualizare disponibilă</strong><small>O versiune nouă Revizio este pregătită.</small></div><button id="updateBtn" class="btn primary small">Actualizează</button></div>
 
-  <!-- BACKGROUND AMBIENT GLOW ORBS -->
-  <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
-    <div class="absolute -top-32 -left-32 w-80 h-80 bg-blue-600/20 dark:bg-blue-600/15 rounded-full blur-3xl animate-pulse"></div>
-    <div class="absolute top-1/2 -right-32 w-80 h-80 bg-cyan-500/20 dark:bg-cyan-500/10 rounded-full blur-3xl"></div>
-    <div class="absolute -bottom-32 left-1/3 w-80 h-80 bg-purple-600/20 dark:bg-purple-600/15 rounded-full blur-3xl"></div>
-  </div>
-
-  <!-- SPLASH SCREEN / FUTURISTIC INTRO ANIMATION -->
-  <div id="splashScreen" class="fixed inset-0 z-50 bg-slate-950 flex flex-col items-center justify-center text-white transition-opacity duration-700">
-    <div class="relative flex items-center justify-center w-28 h-28 mb-6">
-      <!-- Outer Glowing Ring -->
-      <div class="absolute inset-0 rounded-3xl bg-gradient-to-tr from-cyan-500 via-blue-600 to-purple-600 animate-spin blur-md opacity-75" style="animation-duration: 6s;"></div>
-      
-      <!-- Core Icon Container -->
-      <div class="relative w-full h-full bg-slate-900 rounded-3xl border border-white/20 flex items-center justify-center shadow-2xl">
-        <!-- Foc Alb Logo -->
-        <svg class="w-14 h-14 text-white drop-shadow-[0_0_12px_rgba(255,255,255,0.8)]" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-          <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-        </svg>
-      </div>
-    </div>
-    
-    <h1 class="text-3xl font-extrabold tracking-tight shimmer-text mb-1">Revizio</h1>
-    <p class="text-xs text-slate-400 tracking-widest uppercase font-semibold">Smart Gas Operations</p>
-  </div>
-
-  <!-- TOP HEADER -->
-  <header class="pt-safe sticky top-0 z-20 px-4 pb-3 border-b border-slate-200/50 dark:border-white/10 backdrop-blur-2xl bg-white/70 dark:bg-slate-950/70 transition-colors duration-300">
-    <div class="max-w-md mx-auto flex items-center justify-between">
-      <div class="flex items-center gap-2.5">
-        <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center text-white shadow-glow-blue border border-white/20">
-          <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-          </svg>
-        </div>
-        <div>
-          <h1 class="text-lg font-bold tracking-tight text-slate-900 dark:text-white leading-tight">Revizio</h1>
-          <span class="text-[10px] text-cyan-500 font-semibold uppercase tracking-wider block -mt-0.5">Instalații Gaze</span>
-        </div>
-      </div>
-
-      <div class="flex items-center gap-2">
-        <span id="currentDateDisplay" class="text-xs font-semibold text-slate-600 dark:text-slate-300 bg-slate-200/60 dark:bg-slate-800/80 px-3 py-1 rounded-full border border-slate-300/50 dark:border-white/10 backdrop-blur-md"></span>
-      </div>
-    </div>
+  <header class="app-header safe-x">
+    <div class="brand"><img src="./icon-192.png" alt=""><div><strong>Revizio</strong><span>Field performance</span></div></div>
+    <button id="todayChip" class="date-chip" aria-label="Data de astăzi"></button>
   </header>
 
-  <!-- MAIN APP CONTAINER -->
-  <main class="flex-1 max-w-md w-full mx-auto px-4 py-4 mb-24 space-y-4 z-10">
-    
-    <!-- GREETING BANNER WITH ANIMATION -->
-    <div id="greetingContainer" class="opacity-0 translate-y-3 transition-all duration-700 ease-out px-1">
-      <h2 id="greetingText" class="text-2xl font-extrabold tracking-tight shimmer-text">
-        Good Morning Marius
-      </h2>
-      <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-medium">Urmărirea activității și veniturilor zilnice</p>
-    </div>
+  <main class="app-main safe-x">
+    <section id="view-home" class="view active" aria-label="Acasă">
+      <div class="welcome"><div><p id="greeting">Bună dimineața</p><h1>Performanța ta, pe scurt.</h1></div><span id="onlineStatus" class="status-dot">Online</span></div>
 
-    <!-- DASHBOARD VIEW -->
-    <div id="dashboardView" class="space-y-4">
-      
-      <!-- HERO PROGRESS CARD (VisionOS Cyber Design) -->
-      <div id="progressCard" class="relative overflow-hidden rounded-3xl p-5 border border-white/20 dark:border-white/10 shadow-2xl bg-gradient-to-br from-slate-900/90 via-slate-800/95 to-slate-950/90 text-white backdrop-blur-xl">
-        <!-- Accent Glow Inside -->
-        <div class="absolute -right-12 -bottom-12 w-36 h-36 bg-cyan-500/20 rounded-full blur-2xl pointer-events-none"></div>
+      <article class="hero-card">
+        <div class="hero-top"><div><span class="eyebrow">ASTĂZI · FĂRĂ TVA</span><div class="money"><strong id="todayAmount">0,00</strong><span>RON</span></div></div><button id="editTargetBtn" class="icon-btn" aria-label="Editează targetul">✎</button></div>
+        <div class="progress-track"><div id="dailyProgress" class="progress-fill"></div></div>
+        <div class="progress-meta"><span id="dailyPercent">0% realizat</span><strong id="dailyRemaining">0 RON rămas</strong></div>
+        <div id="targetReached" class="success-banner hidden">✓ Target atins. Continuă ritmul!</div>
+      </article>
 
-        <div class="flex justify-between items-start mb-2 relative z-10">
-          <div>
-            <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Progres Zilnic (fără TVA)</span>
-            <div class="flex items-baseline gap-1.5 mt-1">
-              <span id="todayAchievedText" class="text-3xl font-black tracking-tight text-white drop-shadow-sm">0.00</span>
-              <span class="text-sm font-bold text-cyan-400">RON</span>
-            </div>
-          </div>
-
-          <button onclick="openTargetModal()" class="touch-bounce bg-slate-800/90 hover:bg-slate-700/90 text-xs px-3.5 py-2 rounded-2xl border border-slate-700/80 flex items-center gap-1.5 shadow-lg text-slate-200 font-semibold">
-            <span>Target: <strong id="currentTargetText" class="text-cyan-400">1500</strong></span>
-            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-          </button>
-        </div>
-
-        <!-- TARGET REACHED BADGE -->
-        <div id="targetBadge" class="hidden my-2.5 inline-flex items-center gap-1.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 px-3.5 py-1 rounded-full text-xs font-bold animate-pulse shadow-glow-green">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-          Target atins!
-        </div>
-
-        <!-- PROGRESS BAR WITH GLOW -->
-        <div class="w-full bg-slate-950/80 h-4 rounded-full overflow-hidden my-3 p-0.5 border border-slate-700/60 shadow-inner">
-          <div id="progressBar" class="bg-gradient-to-r from-blue-500 via-cyan-400 to-blue-600 h-full rounded-full transition-all duration-700 ease-out shadow-glow-blue" style="width: 0%"></div>
-        </div>
-
-        <div class="flex justify-between text-xs font-semibold text-slate-400 relative z-10">
-          <span id="percentageText">0% realizat</span>
-          <span id="remainingText" class="text-slate-300">1500 RON rămas</span>
-        </div>
+      <div class="metrics-grid">
+        <article class="metric-card"><span class="metric-icon fire">↗</span><div><small>STREAK</small><strong id="streakValue">0 zile</strong></div></article>
+        <article class="metric-card"><span class="metric-icon trophy">★</span><div><small>RECORD</small><strong id="recordValue">0 RON</strong></div></article>
       </div>
 
-      <!-- MAIN QUICK ACTIONS GRID -->
-      <div class="grid grid-cols-2 gap-3.5">
-        <!-- MATERIALE BUTTON CARD -->
-        <button onclick="openMaterialsSheet()" class="touch-bounce rounded-3xl p-4.5 border border-slate-200/60 dark:border-white/10 shadow-sm dark:shadow-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl flex flex-col justify-between text-left group">
-          <div class="w-11 h-11 rounded-2xl bg-blue-500/10 dark:bg-blue-500/20 text-blue-500 flex items-center justify-center mb-3 shadow-glow-blue border border-blue-500/30">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-          </div>
-          <div>
-            <h2 class="font-bold text-slate-900 dark:text-white text-base group-hover:text-blue-500 transition-colors">Materiale</h2>
-            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium leading-tight">Verificări, Revizii, Detectoare</p>
-          </div>
-        </button>
+      <article class="card monthly-card">
+        <div class="card-head"><div><span class="eyebrow" id="monthLabel">TARGET LUNAR</span><h2 id="monthAmount">0 / 0 RON</h2></div><span id="monthPercent" class="percent-pill">0%</span></div>
+        <div class="progress-track slim"><div id="monthProgress" class="progress-fill monthly"></div></div>
+        <div class="month-details"><div><small>RĂMAS</small><strong id="monthRemaining">0 RON</strong></div><div><small>NECESAR / ZI</small><strong id="monthNeeded">0 RON</strong></div><div><small>ZILE LUCRĂTOARE</small><strong id="workDays">0</strong></div></div>
+      </article>
 
-        <!-- SERVEXPRESS CARD -->
-        <button onclick="addServexpress()" class="touch-bounce rounded-3xl p-4.5 border border-slate-200/60 dark:border-white/10 shadow-sm dark:shadow-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl flex flex-col justify-between text-left group">
-          <div class="w-11 h-11 rounded-2xl bg-amber-500/10 dark:bg-amber-500/20 text-amber-500 flex items-center justify-center mb-3 border border-amber-500/30">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-          </div>
-          <div>
-            <div class="flex items-center justify-between">
-              <h2 class="font-bold text-slate-900 dark:text-white text-base group-hover:text-amber-500 transition-colors">Servexpress</h2>
-            </div>
-            <p class="text-xs font-bold text-slate-500 dark:text-slate-400 mt-0.5">190 RON <span class="text-[10px] text-slate-400 font-normal">(~157 RON ex.)</span></p>
-          </div>
-        </button>
-      </div>
+      <div class="section-title"><div><span class="live-dot"></span><h2>Lucrările de astăzi</h2></div><span id="todayCount" class="count-pill">0</span></div>
+      <div id="todayList" class="job-list"></div>
+    </section>
 
-      <!-- TODAY'S EXECUTIONS SECTION -->
-      <div class="rounded-3xl p-4.5 border border-slate-200/60 dark:border-white/10 shadow-sm dark:shadow-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl space-y-3">
-        <div class="flex items-center justify-between border-b border-slate-200/50 dark:border-white/10 pb-2.5">
-          <h3 class="font-bold text-slate-900 dark:text-white text-sm flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-            <span>Adăugate astăzi</span>
-          </h3>
-          <span id="todayCountBadge" class="text-xs bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2.5 py-0.5 rounded-full font-bold border border-slate-200 dark:border-slate-700">0</span>
-        </div>
+    <section id="view-stats" class="view" aria-label="Statistici">
+      <div class="page-title"><span class="eyebrow">ANALIZĂ</span><h1>Statistici</h1><p>Vezi ritmul și sursele performanței.</p></div>
+      <article class="card"><div class="card-head"><div><span class="eyebrow">ULTIMELE 7 ZILE</span><h2 id="sevenTotal">0 RON</h2></div><span class="legend"><i></i> target</span></div><div id="weekChart" class="chart"></div></article>
+      <article class="card"><div class="card-head"><div><span class="eyebrow">LUNA CURENTĂ</span><h2>Pe categorii</h2></div></div><div id="categoryList" class="category-list"></div></article>
+      <article class="card insight-card"><span>RITM LUNAR</span><strong id="paceInsight">Adaugă lucrări pentru a calcula ritmul.</strong></article>
+    </section>
 
-        <div id="todayList" class="space-y-2.5 max-h-72 overflow-y-auto no-scrollbar">
-          <!-- Execuții zilnice dinamice -->
-        </div>
-      </div>
+    <section id="view-history" class="view" aria-label="Istoric">
+      <div class="page-title"><span class="eyebrow">ISTORIC</span><h1>Calendar performanță</h1><p>Atinge o zi pentru detalii.</p></div>
+      <article class="card calendar-card"><div class="calendar-head"><button id="prevMonth" class="icon-btn">‹</button><strong id="calendarTitle"></strong><button id="nextMonth" class="icon-btn">›</button></div><div class="weekdays"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div><div id="calendarGrid" class="calendar-grid"></div><div class="calendar-legend"><span><i class="good"></i>Atins</span><span><i class="mid"></i>50%+</span><span><i class="low"></i>Sub 50%</span><span><i class="none"></i>Fără activitate</span></div></article>
+      <article id="dayDetails" class="card hidden"><div class="card-head"><div><span class="eyebrow">ZI SELECTATĂ</span><h2 id="selectedDate"></h2></div><strong id="selectedTotal">0 RON</strong></div><div id="selectedList" class="job-list compact"></div></article>
+    </section>
 
-    </div>
-
-    <!-- VENITURI VIEW (HIDDEN BY DEFAULT) -->
-    <div id="venituriView" class="space-y-4 hidden">
-      
-      <!-- TOTAL EARNINGS CARD -->
-      <div class="rounded-3xl p-5 border border-white/20 dark:border-white/10 shadow-2xl bg-gradient-to-br from-cyan-600 via-blue-600 to-indigo-700 text-white backdrop-blur-xl relative overflow-hidden">
-        <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
-        <span class="text-xs font-semibold uppercase tracking-wider text-cyan-100">Venit Total Înregistrat (fără TVA)</span>
-        <div class="flex items-baseline gap-1.5 mt-1.5">
-          <span id="totalEarningsText" class="text-3xl font-black tracking-tight text-white drop-shadow-md">0.00</span>
-          <span class="text-sm font-extrabold text-cyan-100">RON</span>
-        </div>
-      </div>
-
-      <!-- THEME SWITCHER CARD -->
-      <div class="rounded-3xl p-4 border border-slate-200/60 dark:border-white/10 shadow-sm dark:shadow-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl space-y-2.5">
-        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Mod Vizualizare / Temă</label>
-        <div class="grid grid-cols-3 gap-1.5 bg-slate-100 dark:bg-slate-950 p-1 rounded-2xl text-xs font-bold border border-slate-200/50 dark:border-white/5">
-          <button id="themeLight" onclick="setTheme('light')" class="touch-bounce py-2.5 rounded-xl transition-all text-slate-600 dark:text-slate-400">Light</button>
-          <button id="themeDark" onclick="setTheme('dark')" class="touch-bounce py-2.5 rounded-xl transition-all text-slate-600 dark:text-slate-400">Dark</button>
-          <button id="themeAuto" onclick="setTheme('auto')" class="touch-bounce py-2.5 rounded-xl transition-all text-slate-600 dark:text-slate-400">Auto</button>
-        </div>
-      </div>
-
-      <!-- CALENDAR / DATE PICKER SECTION (FULLY FIXED RESPONSIVE LAYOUT) -->
-      <div class="rounded-3xl p-4 border border-slate-200/60 dark:border-white/10 shadow-sm dark:shadow-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl space-y-3.5 overflow-hidden">
-        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Selectează Data din Calendar</label>
-
-        <!-- CUSTOM PERFECTLY CONTAINED DATE INPUT -->
-        <div class="date-picker-wrapper">
-          <div class="relative w-full flex items-center justify-between bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white font-bold rounded-2xl px-4 py-3 text-sm shadow-inner transition-all focus-within:ring-2 focus-within:ring-cyan-500">
-            <span id="datePickerDisplay" class="text-sm font-bold text-slate-800 dark:text-slate-100">Alege o dată</span>
-            <div class="flex items-center gap-1.5 text-cyan-500">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-            </div>
-            <input type="date" id="historyDatePicker" onchange="loadHistoryDate()" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer">
-          </div>
-        </div>
-
-        <!-- SELECTED DATE SUMMARY -->
-        <div id="historySummary" class="hidden bg-slate-100/70 dark:bg-slate-950/60 p-3.5 rounded-2xl flex justify-between items-center text-xs font-bold border border-slate-200/50 dark:border-slate-800">
-          <div class="text-slate-600 dark:text-slate-400">Execuții: <span id="historyCount" class="text-slate-900 dark:text-white font-black text-sm ml-1">0</span></div>
-          <div class="text-slate-600 dark:text-slate-400">Total zi: <span id="historyTotal" class="text-cyan-500 font-black text-sm ml-1">0.00 RON</span></div>
-        </div>
-
-        <!-- LIST OF EXECUTIONS FOR SELECTED DATE -->
-        <div id="historyList" class="space-y-2.5 pt-1 max-h-72 overflow-y-auto no-scrollbar">
-          <!-- Execuții la data selectată -->
-        </div>
-      </div>
-
-    </div>
-
+    <section id="view-settings" class="view" aria-label="Setări">
+      <div class="page-title"><span class="eyebrow">REVIZIO</span><h1>Setări</h1><p>Personalizează aplicația și protejează datele.</p></div>
+      <article class="card settings-list">
+        <button id="settingsTarget"><span><small>TARGET ZILNIC</small><strong id="settingsTargetValue">1.500 RON</strong></span><b>›</b></button>
+        <label><span><small>INCLUDE SÂMBĂTA</small><strong>În calculul targetului lunar</strong></span><input id="saturdayToggle" type="checkbox" class="switch"></label>
+        <div class="theme-row"><span><small>TEMĂ</small><strong>Aspectul aplicației</strong></span><div class="segmented"><button data-theme-choice="light">Light</button><button data-theme-choice="dark">Dark</button><button data-theme-choice="auto">Auto</button></div></div>
+      </article>
+      <article class="card"><div class="card-head"><div><span class="eyebrow">DATE</span><h2>Backup și restaurare</h2></div></div><p class="muted">Exportă istoricul înainte de schimbarea telefonului sau a browserului.</p><div class="two-buttons"><button id="exportBtn" class="btn secondary">Export backup</button><button id="importBtn" class="btn secondary">Import backup</button></div><input id="importInput" type="file" accept="application/json,.json" hidden></article>
+      <article class="version-card"><span>Revizio</span><strong>2.0.1 Rebuild</strong></article>
+    </section>
   </main>
 
-  <!-- MATERIALE POPUP / BOTTOM SHEET MODAL -->
-  <div id="materialsOverlay" onclick="closeMaterialsSheet()" class="fixed inset-0 bg-slate-950/60 backdrop-blur-md z-40 hidden opacity-0 transition-opacity duration-300"></div>
-  
-  <div id="materialsSheet" class="fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-t-[32px] max-w-md mx-auto shadow-2xl sheet-transition translate-y-full pb-safe flex flex-col max-h-[85vh] border-t border-slate-200/80 dark:border-white/10">
-    <div class="w-12 h-1.5 bg-slate-300 dark:bg-slate-700 rounded-full mx-auto my-3 flex-shrink-0"></div>
-    
-    <div class="px-5 pb-3 flex justify-between items-center border-b border-slate-200/50 dark:border-slate-800 flex-shrink-0">
-      <div>
-        <h3 class="text-lg font-bold text-slate-900 dark:text-white">Materiale & Servicii</h3>
-        <p class="text-[11px] text-slate-500 dark:text-slate-400">Prețurile finale adaugă suma fără TVA la progres</p>
-      </div>
-      <button onclick="closeMaterialsSheet()" class="touch-bounce w-8 h-8 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-full flex items-center justify-center font-bold text-sm">✕</button>
-    </div>
-
-    <!-- TABS -->
-    <div class="flex p-1.5 bg-slate-100 dark:bg-slate-950 rounded-2xl mx-5 my-3 gap-1 flex-shrink-0 text-xs font-bold text-slate-600 dark:text-slate-400 border border-slate-200/50 dark:border-white/5">
-      <button id="tabVerificare" onclick="switchTab('Verificare')" class="flex-1 py-2.5 rounded-xl transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm">Verificare</button>
-      <button id="tabRevizie" onclick="switchTab('Revizie')" class="flex-1 py-2.5 rounded-xl transition-all">Revizie</button>
-      <button id="tabEchipament" onclick="switchTab('Echipament')" class="flex-1 py-2.5 rounded-xl transition-all">Detectoare</button>
-    </div>
-
-    <div id="materialsContent" class="overflow-y-auto px-5 pb-6 space-y-2.5 flex-1 no-scrollbar"></div>
-  </div>
-
-  <!-- TARGET EDIT MODAL -->
-  <div id="targetOverlay" onclick="closeTargetModal()" class="fixed inset-0 bg-slate-950/60 backdrop-blur-md z-40 hidden"></div>
-  <div id="targetModal" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-xs bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-2xl z-50 hidden border border-slate-200 dark:border-white/10">
-    <h3 class="font-bold text-slate-900 dark:text-white mb-1 text-base">Setează Target Zilnic</h3>
-    <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 font-medium">Alege valoarea obiectivului în RON (fără TVA).</p>
-    <input type="number" id="targetInput" step="50" class="w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 text-center text-xl font-black text-slate-900 dark:text-white mb-4 focus:outline-none focus:ring-2 focus:ring-cyan-500">
-    <div class="flex gap-2">
-      <button onclick="closeTargetModal()" class="touch-bounce flex-1 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-2xl">Anulează</button>
-      <button onclick="saveTarget()" class="touch-bounce flex-1 py-3 bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold text-xs rounded-2xl shadow-glow-blue">Salvează</button>
-    </div>
-  </div>
-
-  <!-- BOTTOM NAVIGATION BAR -->
-  <nav class="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-2xl border-t border-slate-200/80 dark:border-white/10 z-30 pb-safe transition-colors duration-300">
-    <div class="max-w-md mx-auto grid grid-cols-2 py-2.5">
-      <button id="navDashboard" onclick="switchView('dashboard')" class="touch-bounce flex flex-col items-center gap-1 text-cyan-500">
-        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l1.293 1.293a1 1 0 001.414-1.414l-7-7z"></path></svg>
-        <span class="text-[11px] font-bold">Dashboard</span>
-      </button>
-      <button id="navVenituri" onclick="switchView('venituri')" class="touch-bounce flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500">
-        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"></path></svg>
-        <span class="text-[11px] font-bold">Venituri</span>
-      </button>
-    </div>
+  <button id="fab" class="fab" aria-label="Adaugă lucrare"><span>+</span></button>
+  <nav class="tabbar safe-x" aria-label="Navigare principală">
+    <button class="tab active" data-view="home"><span>⌂</span><small>Acasă</small></button>
+    <button class="tab" data-view="stats"><span>▥</span><small>Statistici</small></button>
+    <div class="fab-space"></div>
+    <button class="tab" data-view="history"><span>▦</span><small>Istoric</small></button>
+    <button class="tab" data-view="settings"><span>⚙</span><small>Setări</small></button>
   </nav>
 
-  <!-- JAVASCRIPT LOGIC -->
-  <script>
-    const VAT_RATE = 1.21;
+  <div id="sheetBackdrop" class="backdrop hidden"></div>
+  <section id="addSheet" class="bottom-sheet" aria-modal="true" role="dialog" aria-label="Adaugă lucrare"><div class="grabber"></div><div class="sheet-head"><div><span class="eyebrow">ADĂUGARE RAPIDĂ</span><h2>Alege serviciul</h2></div><button id="closeSheet" class="icon-btn">×</button></div><div id="serviceTabs" class="service-tabs"></div><div id="serviceList" class="service-list"></div></section>
 
-    const catalogData = {
-      Verificare: [
-        { name: "Verificare inspectie IU 1PDA", priceVat: 190 },
-        { name: "Verificare inspectie IU 2PDA", priceVat: 230 },
-        { name: "Verificare inspectie IU 3PDA", priceVat: 300 },
-        { name: "Verificare inspectie IU 4+ PDA", priceVat: 380 },
-      ],
-      Revizie: [
-        { name: "Revizie - Inspectie IU 1 PDA", priceVat: 230 },
-        { name: "Revizie Inspectie IU 2 PDA", priceVat: 290 },
-        { name: "Revizie Inspectie IU 3 PDA", priceVat: 375 },
-        { name: "Revizie inspectie IU 4+ PDA", priceVat: 480 },
-      ],
-      Echipament: [
-        { name: "Detector HD100 PRO Double Control", priceVat: 310 },
-        { name: "Detector Homplex HD300 PRO", priceVat: 485 },
-      ]
-    };
-
-    let state = {
-      target: 1500,
-      executions: [],
-      activeTab: 'Verificare',
-      theme: 'dark'
-    };
-
-    function initApp() {
-      loadState();
-      applyTheme();
-      updateDateDisplay();
-      renderDashboard();
-      initHistoryDatePicker();
-      registerSW();
-
-      // Splash Screen Transition
-      setTimeout(() => {
-        const splash = document.getElementById('splashScreen');
-        splash.style.opacity = '0';
-        setTimeout(() => splash.remove(), 700);
-
-        // Greeting Banner Slide-in
-        const greeting = document.getElementById('greetingContainer');
-        greeting.classList.remove('opacity-0', 'translate-y-3');
-      }, 900);
-    }
-
-    function setTheme(mode) {
-      state.theme = mode;
-      saveState();
-      applyTheme();
-    }
-
-    function applyTheme() {
-      const html = document.documentElement;
-      const isDark = state.theme === 'dark' || (state.theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-      
-      if (isDark) {
-        html.classList.add('dark');
-        html.classList.remove('light');
-      } else {
-        html.classList.remove('dark');
-        html.classList.add('light');
-      }
-
-      ['light', 'dark', 'auto'].forEach(t => {
-        const btn = document.getElementById(`theme${t.charAt(0).toUpperCase() + t.slice(1)}`);
-        if (state.theme === t) {
-          btn.className = "touch-bounce py-2.5 rounded-xl transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm font-black";
-        } else {
-          btn.className = "touch-bounce py-2.5 rounded-xl transition-all text-slate-500 dark:text-slate-400 font-bold";
-        }
-      });
-    }
-
-    function getTodayString() {
-      const today = new Date();
-      return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-    }
-
-    function formatNumber(num) {
-      return Number(num || 0).toLocaleString('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    }
-
-    function updateDateDisplay() {
-      const options = { weekday: 'short', day: 'numeric', month: 'short' };
-      document.getElementById('currentDateDisplay').innerText = new Date().toLocaleDateString('ro-RO', options);
-    }
-
-    function saveState() {
-      localStorage.setItem('revizio_app_state_v3', JSON.stringify(state));
-    }
-
-    function loadState() {
-      const saved = localStorage.getItem('revizio_app_state_v3') || localStorage.getItem('revizio_app_state');
-      if (saved) {
-        try {
-          state = JSON.parse(saved);
-          if (!state.executions) state.executions = [];
-          if (!state.target) state.target = 1500;
-          if (!state.theme) state.theme = 'dark';
-        } catch (e) {
-          console.error("Failed to load state", e);
-        }
-      }
-    }
-
-    function renderDashboard() {
-      const todayStr = getTodayString();
-      const todayExecs = state.executions.filter(e => e.date === todayStr);
-      
-      const todayAchieved = todayExecs.reduce((sum, item) => sum + item.amountNoVat, 0);
-      const target = state.target;
-      const percentage = Math.min(Math.round((todayAchieved / target) * 100), 100);
-      const remaining = Math.max(target - todayAchieved, 0);
-
-      document.getElementById('todayAchievedText').innerText = formatNumber(todayAchieved);
-      document.getElementById('currentTargetText').innerText = target;
-      document.getElementById('percentageText').innerText = `${percentage}% realizat`;
-      document.getElementById('remainingText').innerText = `${formatNumber(remaining)} RON rămas`;
-
-      const progressBar = document.getElementById('progressBar');
-      const targetBadge = document.getElementById('targetBadge');
-      
-      progressBar.style.width = `${percentage}%`;
-
-      if (todayAchieved >= target && target > 0) {
-        progressBar.className = "bg-gradient-to-r from-emerald-500 to-green-400 h-full rounded-full transition-all duration-700 ease-out shadow-glow-green";
-        targetBadge.classList.remove('hidden');
-      } else {
-        progressBar.className = "bg-gradient-to-r from-blue-500 via-cyan-400 to-blue-600 h-full rounded-full transition-all duration-700 ease-out shadow-glow-blue";
-        targetBadge.classList.add('hidden');
-      }
-
-      const todayList = document.getElementById('todayList');
-      document.getElementById('todayCountBadge').innerText = todayExecs.length;
-
-      if (todayExecs.length === 0) {
-        todayList.innerHTML = `<div class="text-center py-6 text-xs font-semibold text-slate-400 dark:text-slate-500">Nu ai adăugat nicio execuție astăzi.</div>`;
-      } else {
-        todayList.innerHTML = todayExecs.slice().reverse().map(item => `
-          <div class="flex items-center justify-between p-3.5 bg-slate-100/70 dark:bg-slate-950/60 rounded-2xl border border-slate-200/50 dark:border-slate-800 transition-all">
-            <div>
-              <div class="text-xs font-bold text-slate-900 dark:text-white">${item.name}</div>
-              <div class="text-[11px] text-cyan-600 dark:text-cyan-400 font-extrabold">+${formatNumber(item.amountNoVat)} RON <span class="text-[10px] text-slate-400 font-normal">(fără TVA)</span></div>
-            </div>
-            <button onclick="deleteExecution('${item.id}')" class="touch-bounce text-slate-400 hover:text-red-500 p-2 transition-colors">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-            </button>
-          </div>
-        `).join('');
-      }
-
-      const totalAllTime = state.executions.reduce((sum, item) => sum + item.amountNoVat, 0);
-      document.getElementById('totalEarningsText').innerText = formatNumber(totalAllTime);
-    }
-
-    function addExecution(name, priceVat) {
-      const amountNoVat = priceVat / VAT_RATE;
-      const prevAchieved = state.executions
-        .filter(e => e.date === getTodayString())
-        .reduce((sum, item) => sum + item.amountNoVat, 0);
-
-      const newExecution = {
-        id: Date.now().toString(),
-        name: name,
-        priceVat: priceVat,
-        amountNoVat: amountNoVat,
-        date: getTodayString(),
-        timestamp: Date.now()
-      };
-
-      state.executions.push(newExecution);
-      saveState();
-      renderDashboard();
-
-      const newAchieved = prevAchieved + amountNoVat;
-      if (prevAchieved < state.target && newAchieved >= state.target) {
-        triggerCelebration();
-      }
-
-      closeMaterialsSheet();
-    }
-
-    function addServexpress() {
-      addExecution("Servexpress", 190);
-    }
-
-    function deleteExecution(id) {
-      state.executions = state.executions.filter(e => e.id !== id);
-      saveState();
-      renderDashboard();
-      
-      const picker = document.getElementById('historyDatePicker');
-      if (picker.value) {
-        loadHistoryDate();
-      }
-    }
-
-    function triggerCelebration() {
-      if (typeof confetti === 'function') {
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.65 }
-        });
-      }
-    }
-
-    function switchTab(tab) {
-      state.activeTab = tab;
-      ['Verificare', 'Revizie', 'Echipament'].forEach(t => {
-        const btn = document.getElementById(`tab${t}`);
-        if (t === tab) {
-          btn.className = "flex-1 py-2.5 rounded-xl transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm font-black";
-        } else {
-          btn.className = "flex-1 py-2.5 rounded-xl transition-all text-slate-500 dark:text-slate-400 font-bold";
-        }
-      });
-      renderMaterialsList();
-    }
-
-    function renderMaterialsList() {
-      const container = document.getElementById('materialsContent');
-      const items = catalogData[state.activeTab] || [];
-
-      container.innerHTML = items.map(item => {
-        const priceNoVat = item.priceVat / VAT_RATE;
-        return `
-          <button onclick="addExecution('${item.name}', ${item.priceVat})" class="touch-bounce w-full text-left p-4 bg-slate-100/70 dark:bg-slate-950/60 hover:bg-blue-500/10 rounded-2xl border border-slate-200/50 dark:border-slate-800 flex items-center justify-between transition-all">
-            <div>
-              <div class="text-xs font-bold text-slate-900 dark:text-white">${item.name}</div>
-              <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Fără TVA: <strong class="text-cyan-600 dark:text-cyan-400">${formatNumber(priceNoVat)} RON</strong></div>
-            </div>
-            <div class="text-right">
-              <span class="text-sm font-black text-slate-900 dark:text-white">${item.priceVat} RON</span>
-              <span class="block text-[10px] text-slate-400">cu TVA</span>
-            </div>
-          </button>
-        `;
-      }).join('');
-    }
-
-    function openMaterialsSheet() {
-      renderMaterialsList();
-      document.getElementById('materialsOverlay').classList.remove('hidden');
-      setTimeout(() => {
-        document.getElementById('materialsOverlay').classList.remove('opacity-0');
-        document.getElementById('materialsSheet').classList.remove('translate-y-full');
-      }, 10);
-    }
-
-    function closeMaterialsSheet() {
-      document.getElementById('materialsSheet').classList.add('translate-y-full');
-      document.getElementById('materialsOverlay').classList.add('opacity-0');
-      setTimeout(() => {
-        document.getElementById('materialsOverlay').classList.add('hidden');
-      }, 300);
-    }
-
-    function openTargetModal() {
-      document.getElementById('targetInput').value = state.target;
-      document.getElementById('targetOverlay').classList.remove('hidden');
-      document.getElementById('targetModal').classList.remove('hidden');
-    }
-
-    function closeTargetModal() {
-      document.getElementById('targetOverlay').classList.add('hidden');
-      document.getElementById('targetModal').classList.add('hidden');
-    }
-
-    function saveTarget() {
-      const val = parseFloat(document.getElementById('targetInput').value);
-      if (val && val > 0) {
-        state.target = val;
-        saveState();
-        renderDashboard();
-        closeTargetModal();
-      }
-    }
-
-    function switchView(view) {
-      const dashView = document.getElementById('dashboardView');
-      const venView = document.getElementById('venituriView');
-      const navDash = document.getElementById('navDashboard');
-      const navVen = document.getElementById('navVenituri');
-
-      if (view === 'dashboard') {
-        dashView.classList.remove('hidden');
-        venView.classList.add('hidden');
-        navDash.className = "touch-bounce flex flex-col items-center gap-1 text-cyan-500";
-        navVen.className = "touch-bounce flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500";
-      } else {
-        dashView.classList.add('hidden');
-        venView.classList.remove('hidden');
-        navDash.className = "touch-bounce flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500";
-        navVen.className = "touch-bounce flex flex-col items-center gap-1 text-cyan-500";
-        loadHistoryDate();
-      }
-    }
-
-    function initHistoryDatePicker() {
-      const picker = document.getElementById('historyDatePicker');
-      const today = getTodayString();
-      picker.value = today;
-      updateDatePickerDisplay(today);
-    }
-
-    function updateDatePickerDisplay(dateStr) {
-      const display = document.getElementById('datePickerDisplay');
-      if (!dateStr) {
-        display.innerText = "Selectează o dată";
-        return;
-      }
-      const parts = dateStr.split('-');
-      if (parts.length === 3) {
-        const d = new Date(parts[0], parts[1] - 1, parts[2]);
-        const options = { day: 'numeric', month: 'long', year: 'numeric' };
-        display.innerText = d.toLocaleDateString('ro-RO', options);
-      } else {
-        display.innerText = dateStr;
-      }
-    }
-
-    function loadHistoryDate() {
-      const picker = document.getElementById('historyDatePicker');
-      const selectedDate = picker.value;
-      updateDatePickerDisplay(selectedDate);
-
-      const listContainer = document.getElementById('historyList');
-      const summaryContainer = document.getElementById('historySummary');
-
-      if (!selectedDate) return;
-
-      const filtered = state.executions.filter(e => e.date === selectedDate);
-      summaryContainer.classList.remove('hidden');
-
-      const dayTotal = filtered.reduce((sum, item) => sum + item.amountNoVat, 0);
-      document.getElementById('historyCount').innerText = filtered.length;
-      document.getElementById('historyTotal').innerText = `${formatNumber(dayTotal)} RON`;
-
-      if (filtered.length === 0) {
-        listContainer.innerHTML = `<div class="text-center py-6 text-xs font-semibold text-slate-400 dark:text-slate-500">Nu există execuții pentru această dată.</div>`;
-      } else {
-        listContainer.innerHTML = filtered.slice().reverse().map(item => `
-          <div class="flex items-center justify-between p-3.5 bg-slate-100/70 dark:bg-slate-950/60 rounded-2xl border border-slate-200/50 dark:border-slate-800">
-            <div>
-              <div class="text-xs font-bold text-slate-900 dark:text-white">${item.name}</div>
-              <div class="text-[11px] text-cyan-600 dark:text-cyan-400 font-extrabold">+${formatNumber(item.amountNoVat)} RON</div>
-            </div>
-            <button onclick="deleteExecution('${item.id}')" class="touch-bounce text-slate-400 hover:text-red-500 p-2 transition-colors">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-            </button>
-          </div>
-        `).join('');
-      }
-    }
-
-    function registerSW() {
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js').catch(err => console.log("SW reg failed", err));
-      }
-    }
-
-    window.onload = initApp;
-  </script>
+  <div id="targetModal" class="modal-wrap hidden"><div class="modal"><span class="eyebrow">OBIECTIV</span><h2>Target zilnic</h2><p>Targetul lunar se recalculează automat.</p><div class="input-suffix"><input id="targetInput" type="number" inputmode="decimal" min="1" step="50"><span>RON</span></div><div class="two-buttons"><button id="cancelTarget" class="btn secondary">Anulează</button><button id="saveTarget" class="btn primary">Salvează</button></div></div></div>
+  <div id="undoToast" class="undo hidden"><span>Lucrare ștearsă</span><button id="undoBtn">ANULEAZĂ</button></div>
+  <script src="./app.js" defer></script>
 </body>
 </html>

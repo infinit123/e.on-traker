@@ -1,4 +1,9 @@
-# Revizio 2.0.1
-Publică toate fișierele în rădăcina GitHub Pages. Pentru următoarea versiune, actualizează APP_VERSION din sw.js.
+# Revizio 2.0.1 Rebuild
 
-MIGRARE V2.0.1: acest service worker activeaza automat o singura data pentru a inlocui cache-ul vechi. Dupa publicare, inchide complet Revizio si redeschide-o de doua ori.
+Reconstrucție completă, fără Tailwind, Google Fonts sau alte dependențe CDN.
+
+## Publicare
+Încarcă toate fișierele în rădăcina GitHub Pages. Nu schimba structura. Fișierele vechi pot fi înlocuite, iar datele existente vor fi citite din cheia `revizio_app_state_v3`.
+
+## Update-uri viitoare
+Schimbă valoarea `VERSION` din `sw.js` la fiecare versiune. Aplicația va afișa butonul Actualizează când noul Service Worker ajunge în starea waiting.
