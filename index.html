@@ -64,6 +64,13 @@
       <article id="dayDetails" class="card hidden"><div class="card-head"><div><span class="eyebrow">ZI SELECTATĂ</span><h2 id="selectedDate"></h2></div><strong id="selectedTotal">0 RON</strong></div><div id="selectedList" class="job-list compact"></div></article>
     </section>
 
+    <section id="view-appointments" class="view" aria-label="Programări">
+      <div class="page-title"><span class="eyebrow">CLIENȚI</span><h1>Programări</h1><p>Gestionează vizitele și refolosește datele clienților.</p></div>
+      <div class="appointment-actions"><button id="newAppointmentBtn" class="btn primary">+ Programare nouă</button><button id="existingClientBtn" class="btn secondary">Client existent</button></div>
+      <article class="card"><div class="card-head"><div><span class="eyebrow">URMĂTOARELE PROGRAMĂRI</span><h2 id="appointmentsHeading">Agenda</h2></div><span id="appointmentCount" class="count-pill">0</span></div><div id="appointmentsList" class="appointment-list"></div></article>
+      <article class="card"><div class="card-head"><div><span class="eyebrow">CLIENȚI SALVAȚI</span><h2>Clienți</h2></div></div><div class="search-box"><input id="clientSearch" type="search" placeholder="Caută după nume, telefon sau locație" autocomplete="off"></div><div id="clientsList" class="client-list"></div></article>
+    </section>
+
     <section id="view-settings" class="view" aria-label="Setări">
       <div class="page-title"><span class="eyebrow">REVIZIO</span><h1>Setări</h1><p>Personalizează aplicația și protejează datele.</p></div>
       <article class="card settings-list">
@@ -72,7 +79,7 @@
         <div class="theme-row"><span><small>TEMĂ</small><strong>Aspectul aplicației</strong></span><div class="segmented"><button data-theme-choice="light">Light</button><button data-theme-choice="dark">Dark</button><button data-theme-choice="auto">Auto</button></div></div>
       </article>
       <article class="card"><div class="card-head"><div><span class="eyebrow">DATE</span><h2>Backup și restaurare</h2></div></div><p class="muted">Exportă istoricul înainte de schimbarea telefonului sau a browserului.</p><div class="two-buttons"><button id="exportBtn" class="btn secondary">Export backup</button><button id="importBtn" class="btn secondary">Import backup</button></div><input id="importInput" type="file" accept="application/json,.json" hidden></article>
-      <article class="version-card"><span>Revizio</span><strong>2.0.1 Rebuild</strong></article>
+      <article class="version-card"><span>Revizio</span><strong>2.0.2 Appointments</strong></article>
     </section>
   </main>
 
@@ -82,6 +89,7 @@
     <button class="tab" data-view="stats"><span>▥</span><small>Statistici</small></button>
     <div class="fab-space"></div>
     <button class="tab" data-view="history"><span>▦</span><small>Istoric</small></button>
+    <button class="tab" data-view="appointments"><span>◷</span><small>Programări</small></button>
     <button class="tab" data-view="settings"><span>⚙</span><small>Setări</small></button>
   </nav>
 
@@ -89,6 +97,8 @@
   <section id="addSheet" class="bottom-sheet" aria-modal="true" role="dialog" aria-label="Adaugă lucrare"><div class="grabber"></div><div class="sheet-head"><div><span class="eyebrow">ADĂUGARE RAPIDĂ</span><h2>Alege serviciul</h2></div><button id="closeSheet" class="icon-btn">×</button></div><div id="serviceTabs" class="service-tabs"></div><div id="serviceList" class="service-list"></div></section>
 
   <div id="targetModal" class="modal-wrap hidden"><div class="modal"><span class="eyebrow">OBIECTIV</span><h2>Target zilnic</h2><p>Targetul lunar se recalculează automat.</p><div class="input-suffix"><input id="targetInput" type="number" inputmode="decimal" min="1" step="50"><span>RON</span></div><div class="two-buttons"><button id="cancelTarget" class="btn secondary">Anulează</button><button id="saveTarget" class="btn primary">Salvează</button></div></div></div>
+  <div id="appointmentModal" class="modal-wrap hidden"><div class="modal appointment-modal"><span class="eyebrow" id="appointmentModalEyebrow">PROGRAMARE</span><h2 id="appointmentModalTitle">Programare nouă</h2><p id="appointmentModeHint">Datele clientului vor fi salvate automat.</p><input id="appointmentClientId" type="hidden"><div class="form-grid"><label><span>Nume client</span><input id="appointmentName" type="text" autocomplete="name" placeholder="Nume și prenume"></label><label><span>Locație</span><input id="appointmentLocation" type="text" autocomplete="street-address" placeholder="Adresă / localitate"></label><label><span>Telefon</span><input id="appointmentPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="07xx xxx xxx"></label><div class="form-two"><label><span>Data</span><input id="appointmentDate" type="date"></label><label><span>Ora</span><input id="appointmentTime" type="time"></label></div><label><span>Tip serviciu</span><select id="appointmentService"><option value="Montaj">Montaj</option><option value="Verificare">Verificare</option><option value="Revizie">Revizie</option></select></label></div><div class="two-buttons"><button id="cancelAppointment" class="btn secondary">Anulează</button><button id="saveAppointment" class="btn primary">Salvează</button></div></div></div>
+  <div id="clientPickerModal" class="modal-wrap hidden"><div class="modal"><span class="eyebrow">CLIENT EXISTENT</span><h2>Alege clientul</h2><p>Datele vor fi completate automat. Vei seta doar data și ora.</p><div class="search-box"><input id="clientPickerSearch" type="search" placeholder="Caută client"></div><div id="clientPickerList" class="client-picker-list"></div><button id="closeClientPicker" class="btn secondary full-btn">Închide</button></div></div>
   <div id="undoToast" class="undo hidden"><span>Lucrare ștearsă</span><button id="undoBtn">ANULEAZĂ</button></div>
   <script src="./app.js" defer></script>
 </body>

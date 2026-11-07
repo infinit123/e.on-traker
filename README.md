@@ -7,3 +7,6 @@ Reconstrucție completă, fără Tailwind, Google Fonts sau alte dependențe CDN
 
 ## Update-uri viitoare
 Schimbă valoarea `VERSION` din `sw.js` la fiecare versiune. Aplicația va afișa butonul Actualizează când noul Service Worker ajunge în starea waiting.
+
+## Programări clienți
+Versiunea include stocare locală pentru clienți și programări. La salvarea unei programări, clientul este păstrat în `state.clients`; programările sunt păstrate în `state.appointments`. O programare nouă pentru un client existent reutilizează numele, locația și telefonul.
