@@ -1,8 +1,8 @@
 {
   "id": "./",
   "short_name": "Revizio",
-  "name": "Revizio - Performanță pe teren",
-  "description": "Tracker personal pentru activitatea și performanța zilnică pe teren.",
+  "name": "Revizio 2.0.1 - Performanță pe teren",
+  "description": "Tracker pentru activitatea și performanța zilnică pe teren.",
   "icons": [
     {
       "src": "icon-192.png",
@@ -29,10 +29,5 @@
   "theme_color": "#030712",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "lang": "ro",
-  "dir": "ltr",
-  "categories": [
-    "productivity",
-    "business"
-  ]
+  "lang": "ro"
 }
