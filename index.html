@@ -10,12 +10,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Revizio">
   <meta name="theme-color" content="#030712">
-  <meta name="revizio-version" content="2.0.1">
-  <meta name="format-detection" content="telephone=no">
   <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="icon" sizes="192x192" href="icon-192.png">
-  <link rel="icon" sizes="512x512" href="icon-512.png">
+  <link rel="apple-touch-icon" href="icon.png">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -139,7 +135,6 @@
   </style>
 </head>
 <body class="bg-cyberLightBg dark:bg-cyberDark text-slate-900 dark:text-slate-100 antialiased flex flex-col min-h-screen transition-colors duration-500 selection:bg-blue-500 selection:text-white">
-<div id="updateBanner" class="hidden fixed top-0 left-0 right-0 z-[100] safe-x pt-safe"><div class="max-w-md mx-auto rounded-2xl bg-slate-950/95 text-white border border-cyan-400/40 p-3 flex items-center gap-3 shadow-2xl"><div class="flex-1"><p class="text-sm font-bold">Actualizare disponibilă</p><p class="text-[11px] text-slate-400">Revizio 2.0.1 este pregătită.</p></div><button id="updateAppButton" class="rounded-xl bg-cyan-500 text-slate-950 px-3 text-xs font-black">Actualizează</button></div></div>
 
   <!-- BACKGROUND AMBIENT GLOW ORBS -->
   <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
@@ -262,7 +257,7 @@
             <div class="flex items-center justify-between">
               <h2 class="font-bold text-slate-900 dark:text-white text-base group-hover:text-amber-500 transition-colors">Servexpress</h2>
             </div>
-            <p class="text-xs font-bold text-slate-500 dark:text-slate-400 mt-0.5">190 RON <span class="text-[10px] text-slate-400 font-normal">integral</span></p>
+            <p class="text-xs font-bold text-slate-500 dark:text-slate-400 mt-0.5">190 RON <span class="text-[10px] text-slate-400 font-normal">(~157 RON ex.)</span></p>
           </div>
         </button>
       </div>
@@ -548,10 +543,8 @@
       document.getElementById('totalEarningsText').innerText = formatNumber(totalAllTime);
     }
 
-    function inferCategory(name) { const n=String(name).toLowerCase(); if(n.includes('servexpress')) return 'Servexpress'; if(n.includes('revizie')) return 'Revizii'; if(n.includes('detector')||n.includes('homplex')) return 'Detectoare'; return 'Verificări'; }
-    function haptic(pattern=20){ if('vibrate' in navigator) navigator.vibrate(pattern); }
-    function addExecution(name, priceVat, keepFullAmount = false) {
-      const amountNoVat = keepFullAmount ? priceVat : priceVat / VAT_RATE;
+    function addExecution(name, priceVat) {
+      const amountNoVat = priceVat / VAT_RATE;
       const prevAchieved = state.executions
         .filter(e => e.date === getTodayString())
         .reduce((sum, item) => sum + item.amountNoVat, 0);
@@ -562,13 +555,10 @@
         priceVat: priceVat,
         amountNoVat: amountNoVat,
         date: getTodayString(),
-        timestamp: Date.now(),
-        pricingMode: keepFullAmount ? 'integral' : 'fara_tva',
-        category: inferCategory(name)
+        timestamp: Date.now()
       };
 
       state.executions.push(newExecution);
-      haptic(20);
       saveState();
       renderDashboard();
 
@@ -581,7 +571,7 @@
     }
 
     function addServexpress() {
-      addExecution("Servexpress", 190, true);
+      addExecution("Servexpress", 190);
     }
 
     function deleteExecution(id) {
@@ -754,18 +744,10 @@
       }
     }
 
-    let waitingWorker = null;
-    function showUpdateBanner(worker){ waitingWorker=worker; document.getElementById('updateBanner').classList.remove('hidden'); }
     function registerSW() {
-      if (!('serviceWorker' in navigator)) return;
-      let refreshing=false;
-      navigator.serviceWorker.addEventListener('controllerchange',()=>{if(refreshing)return;refreshing=true;location.reload();});
-      navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(reg=>{
-        if(reg.waiting)showUpdateBanner(reg.waiting);
-        reg.addEventListener('updatefound',()=>{const w=reg.installing;if(!w)return;w.addEventListener('statechange',()=>{if(w.state==='installed'&&navigator.serviceWorker.controller)showUpdateBanner(w);});});
-        reg.update(); setInterval(()=>reg.update(),3600000);
-      });
-      document.getElementById('updateAppButton').addEventListener('click',()=>{if(waitingWorker)waitingWorker.postMessage({type:'SKIP_WAITING'});});
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').catch(err => console.log("SW reg failed", err));
+      }
     }
 
     window.onload = initApp;

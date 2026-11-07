@@ -1,33 +1,17 @@
 {
-  "id": "./",
   "short_name": "Revizio",
-  "name": "Revizio 2.0.1 - Performanță pe teren",
-  "description": "Tracker pentru activitatea și performanța zilnică pe teren.",
+  "name": "Revizio",
   "icons": [
     {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "icon-512.png",
+      "src": "icon.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "icon-maskable-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
+      "type": "image/png"
     }
   ],
   "start_url": "./index.html",
-  "scope": "./",
-  "background_color": "#030712",
-  "theme_color": "#030712",
-  "display": "standalone",
-  "orientation": "portrait-primary",
-  "lang": "ro"
+  "background_color": "#0284c7",
+  "theme_color": "#0284c7",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "lang": "rm"
 }
