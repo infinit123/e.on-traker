@@ -10,8 +10,14 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Revizio">
   <meta name="theme-color" content="#030712">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="application-name" content="Revizio">
+  <meta name="revizio-version" content="2.0.0">
   <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -56,15 +62,21 @@
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
       user-select: none;
+      -webkit-user-select: none;
     }
 
     body {
       touch-action: manipulation;
+      min-height: 100dvh;
+      overscroll-behavior-y: none;
+      -webkit-text-size-adjust: 100%;
       overflow-x: hidden;
       width: 100vw;
     }
 
     .pb-safe { padding-bottom: max(1.25rem, env(safe-area-inset-bottom)); }
+    .pl-safe { padding-left: env(safe-area-inset-left); }
+    .pr-safe { padding-right: env(safe-area-inset-right); }
     .pt-safe { padding-top: max(1rem, env(safe-area-inset-top)); }
 
     /* VisionOS Glassmorphism */
@@ -135,6 +147,15 @@
   </style>
 </head>
 <body class="bg-cyberLightBg dark:bg-cyberDark text-slate-900 dark:text-slate-100 antialiased flex flex-col min-h-screen transition-colors duration-500 selection:bg-blue-500 selection:text-white">
+  <!-- UPDATE DISPONIBIL: apare când un Service Worker nou așteaptă activarea -->
+  <div id="updateBanner" class="hidden fixed top-0 left-0 right-0 z-[100] px-4 pt-safe">
+    <div class="max-w-md mx-auto rounded-2xl bg-slate-900/95 text-white border border-cyan-400/40 shadow-2xl backdrop-blur-xl p-3 flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-cyan-500/20 text-cyan-300 flex items-center justify-center">↻</div>
+      <div class="flex-1 min-w-0"><p class="text-sm font-bold">Actualizare Revizio disponibilă</p><p class="text-[11px] text-slate-300">Datele salvate rămân păstrate.</p></div>
+      <button id="updateAppButton" class="touch-bounce px-3 py-2 rounded-xl bg-cyan-500 text-slate-950 text-xs font-black">Actualizează</button>
+    </div>
+  </div>
+
 
   <!-- BACKGROUND AMBIENT GLOW ORBS -->
   <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
@@ -257,7 +278,7 @@
             <div class="flex items-center justify-between">
               <h2 class="font-bold text-slate-900 dark:text-white text-base group-hover:text-amber-500 transition-colors">Servexpress</h2>
             </div>
-            <p class="text-xs font-bold text-slate-500 dark:text-slate-400 mt-0.5">190 RON <span class="text-[10px] text-slate-400 font-normal">(~157 RON ex.)</span></p>
+            <p class="text-xs font-bold text-slate-500 dark:text-slate-400 mt-0.5">190 RON <span class="text-[10px] text-emerald-500 font-semibold">integral</span></p>
           </div>
         </button>
       </div>
@@ -292,6 +313,27 @@
         </div>
       </div>
 
+      <!-- STATISTICI DE PERFORMANȚĂ -->
+      <div class="rounded-3xl p-4 border border-slate-200/60 dark:border-white/10 shadow-sm dark:shadow-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl">
+        <div class="flex items-center justify-between mb-3"><h3 class="font-bold text-sm">Performanță</h3><span id="statsPeriod" class="text-[10px] text-cyan-500 font-bold uppercase">Săptămâna curentă</span></div>
+        <div class="grid grid-cols-2 gap-2.5">
+          <div class="rounded-2xl bg-slate-100 dark:bg-slate-950/70 p-3"><p class="text-[10px] text-slate-500 uppercase font-bold">Total săptămână</p><p id="weekTotalText" class="text-lg font-black text-cyan-500">0,00 RON</p></div>
+          <div class="rounded-2xl bg-slate-100 dark:bg-slate-950/70 p-3"><p class="text-[10px] text-slate-500 uppercase font-bold">Media / zi activă</p><p id="dailyAverageText" class="text-lg font-black">0,00 RON</p></div>
+          <div class="rounded-2xl bg-slate-100 dark:bg-slate-950/70 p-3"><p class="text-[10px] text-slate-500 uppercase font-bold">Lucrări</p><p id="weekJobsText" class="text-lg font-black">0</p></div>
+          <div class="rounded-2xl bg-slate-100 dark:bg-slate-950/70 p-3"><p class="text-[10px] text-slate-500 uppercase font-bold">Cea mai bună zi</p><p id="bestDayText" class="text-sm font-black">-</p></div>
+        </div>
+      </div>
+      <!-- BACKUP ȘI RESTAURARE -->
+      <div class="rounded-3xl p-4 border border-slate-200/60 dark:border-white/10 shadow-sm dark:shadow-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl">
+        <h3 class="font-bold text-sm mb-1">Siguranța datelor</h3>
+        <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-3">Exportă periodic istoricul și setările Revizio.</p>
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="exportBackup()" class="touch-bounce py-3 rounded-2xl bg-blue-500/15 text-blue-500 border border-blue-500/30 text-xs font-bold">Export backup</button>
+          <button onclick="document.getElementById('backupInput').click()" class="touch-bounce py-3 rounded-2xl bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 text-xs font-bold">Import backup</button>
+          <input id="backupInput" type="file" accept="application/json,.json" class="hidden" onchange="importBackup(event)">
+        </div>
+        <p class="mt-3 text-[10px] text-slate-400">Versiune: <strong id="appVersionText">2.0.0</strong></p>
+      </div>
       <!-- THEME SWITCHER CARD -->
       <div class="rounded-3xl p-4 border border-slate-200/60 dark:border-white/10 shadow-sm dark:shadow-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl space-y-2.5">
         <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Mod Vizualizare / Temă</label>
@@ -541,10 +583,11 @@
 
       const totalAllTime = state.executions.reduce((sum, item) => sum + item.amountNoVat, 0);
       document.getElementById('totalEarningsText').innerText = formatNumber(totalAllTime);
+      renderStatistics();
     }
 
-    function addExecution(name, priceVat) {
-      const amountNoVat = priceVat / VAT_RATE;
+    function addExecution(name, priceVat, keepFullAmount = false) {
+      const amountNoVat = keepFullAmount ? priceVat : priceVat / VAT_RATE;
       const prevAchieved = state.executions
         .filter(e => e.date === getTodayString())
         .reduce((sum, item) => sum + item.amountNoVat, 0);
@@ -555,7 +598,8 @@
         priceVat: priceVat,
         amountNoVat: amountNoVat,
         date: getTodayString(),
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        pricingMode: keepFullAmount ? 'integral' : 'fara_tva'
       };
 
       state.executions.push(newExecution);
@@ -571,7 +615,7 @@
     }
 
     function addServexpress() {
-      addExecution("Servexpress", 190);
+      addExecution("Servexpress", 190, true);
     }
 
     function deleteExecution(id) {
@@ -744,10 +788,79 @@
       }
     }
 
+    function renderStatistics() {
+      const now = new Date();
+      const monday = new Date(now);
+      const day = (now.getDay() + 6) % 7;
+      monday.setHours(0,0,0,0);
+      monday.setDate(now.getDate() - day);
+      const weekExecs = state.executions.filter(item => {
+        const d = new Date(item.date + 'T00:00:00');
+        return d >= monday && d <= now;
+      });
+      const weekTotal = weekExecs.reduce((s, i) => s + Number(i.amountNoVat || 0), 0);
+      const byDay = {};
+      weekExecs.forEach(i => byDay[i.date] = (byDay[i.date] || 0) + Number(i.amountNoVat || 0));
+      const activeDays = Object.keys(byDay).length;
+      const best = Object.entries(byDay).sort((a,b) => b[1]-a[1])[0];
+      const set = (id, value) => { const el = document.getElementById(id); if (el) el.innerText = value; };
+      set('weekTotalText', formatNumber(weekTotal) + ' RON');
+      set('dailyAverageText', formatNumber(activeDays ? weekTotal / activeDays : 0) + ' RON');
+      set('weekJobsText', weekExecs.length);
+      set('bestDayText', best ? new Date(best[0] + 'T00:00:00').toLocaleDateString('ro-RO', {weekday:'short', day:'numeric'}) : '-');
+    }
+    function exportBackup() {
+      const payload = { app: 'Revizio', version: '2.0.0', exportedAt: new Date().toISOString(), state };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'revizio-backup-' + getTodayString() + '.json'; a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1500);
+    }
+    function importBackup(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(reader.result);
+          const incoming = parsed.state || parsed;
+          if (!Array.isArray(incoming.executions)) throw new Error('Backup invalid');
+          state = {...state, ...incoming}; saveState(); renderDashboard(); applyTheme();
+          alert('Backup importat cu succes.');
+        } catch (e) { alert('Fișierul selectat nu este un backup Revizio valid.'); }
+        event.target.value = '';
+      };
+      reader.readAsText(file);
+    }
+    let waitingWorker = null;
+    function showUpdateBanner(worker) {
+      waitingWorker = worker;
+      document.getElementById('updateBanner').classList.remove('hidden');
+    }
     function registerSW() {
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js').catch(err => console.log("SW reg failed", err));
-      }
+      if (!('serviceWorker' in navigator)) return;
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (refreshing) return;
+        refreshing = true;
+        window.location.reload();
+      });
+      navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then(reg => {
+        if (reg.waiting) showUpdateBanner(reg.waiting);
+        reg.addEventListener('updatefound', () => {
+          const worker = reg.installing;
+          if (!worker) return;
+          worker.addEventListener('statechange', () => {
+            if (worker.state === 'installed' && navigator.serviceWorker.controller) showUpdateBanner(worker);
+          });
+        });
+        reg.update();
+        setInterval(() => reg.update(), 60 * 60 * 1000);
+      }).catch(err => console.log('SW reg failed', err));
+      document.getElementById('updateAppButton').addEventListener('click', () => {
+        if (waitingWorker) waitingWorker.postMessage({type:'SKIP_WAITING'});
+      });
     }
 
     window.onload = initApp;
