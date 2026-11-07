@@ -1,105 +1,151 @@
 <!doctype html>
 <html lang="ro" data-theme="dark">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#07111f">
-  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#eef4fb">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Revizio">
-  <meta name="format-detection" content="telephone=no">
-  <meta name="revizio-version" content="2.0.1-rebuild">
-  <title>Revizio</title>
-  <link rel="manifest" href="./manifest.json">
-  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
-  <link rel="icon" sizes="192x192" href="./icon-192.png">
-  <link rel="stylesheet" href="./app.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta id="themeColor" name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Revizio">
+<meta name="format-detection" content="telephone=no">
+<meta name="revizio-version" content="2.1.0-ios">
+<title>Revizio</title>
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+<link rel="icon" sizes="192x192" href="./icon-192.png">
+<link rel="stylesheet" href="./app.css">
 </head>
-<body>
-  <div class="ambient" aria-hidden="true"></div>
-  <div id="updateToast" class="update-toast hidden" role="status"><div><strong>Actualizare disponibilă</strong><small>O versiune nouă Revizio este pregătită.</small></div><button id="updateBtn" class="btn primary small">Actualizează</button></div>
+<body data-view="home">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></symbol>
+<symbol id="i-chart" viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></symbol>
+<symbol id="i-cal" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+<symbol id="i-set" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-phone" viewBox="0 0 24 24"><path d="M6 4h3l1.5 4-2 1.5a11 11 0 0 0 6 6l1.5-2 4 1.5v3a2 2 0 0 1-2 2A15 15 0 0 1 4 6a2 2 0 0 1 2-2z"/></symbol>
+<symbol id="i-nav" viewBox="0 0 24 24"><path d="M20 4L4 11l7 2 2 7z"/></symbol>
+<symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+<symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z"/></symbol>
+<symbol id="i-star" viewBox="0 0 24 24"><path d="M12 4l2.4 5 5.4.7-4 3.8 1 5.4-4.8-2.7-4.8 2.7 1-5.4-4-3.8 5.4-.7z"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></symbol>
+<symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v11m-4-4l4 4 4-4M5 20h14"/></symbol>
+<symbol id="i-up" viewBox="0 0 24 24"><path d="M12 15V4m-4 4l4-4 4 4M5 20h14"/></symbol>
+</defs></svg>
 
-  <header class="app-header safe-x">
-    <div class="brand"><img src="./icon-192.png" alt=""><div><strong>Revizio</strong><span>Field performance</span></div></div>
-    <button id="todayChip" class="date-chip" aria-label="Data de astăzi"></button>
-  </header>
+<div id="updateToast" class="banner hidden" role="status"><span><b>Actualizare disponibilă</b><small>Versiune nouă Revizio</small></span><button id="updateBtn">Actualizează</button></div>
 
-  <main class="app-main safe-x">
-    <section id="view-home" class="view active" aria-label="Acasă">
-      <div class="welcome"><div><p id="greeting">Bună dimineața</p><h1>Performanța ta, pe scurt.</h1></div><span id="onlineStatus" class="status-dot">Online</span></div>
+<header class="navbar"><span id="offline" class="pill hidden">Offline</span><strong id="navTitle">Acasă</strong><button id="navAction" class="nav-btn hidden" aria-label="Programare nouă"><svg class="ic"><use href="#i-plus"/></svg></button></header>
 
-      <article class="hero-card">
-        <div class="hero-top"><div><span class="eyebrow">ASTĂZI · FĂRĂ TVA</span><div class="money"><strong id="todayAmount">0,00</strong><span>RON</span></div></div><button id="editTargetBtn" class="icon-btn" aria-label="Editează targetul">✎</button></div>
-        <div class="progress-track"><div id="dailyProgress" class="progress-fill"></div></div>
-        <div class="progress-meta"><span id="dailyPercent">0% realizat</span><strong id="dailyRemaining">0 RON rămas</strong></div>
-        <div id="targetReached" class="success-banner hidden">✓ Target atins. Continuă ritmul!</div>
-      </article>
+<main>
+<section id="view-home" class="view active">
+  <h1 class="large">Azi</h1><p id="homeDate" class="sub"></p>
+  <article id="hero" class="group hero" role="button" tabindex="0" aria-label="Editează targetul zilnic">
+    <div class="ring"><svg viewBox="0 0 120 120"><circle class="ring-bg" cx="60" cy="60" r="52"/><circle id="ringArc" class="ring-fg" cx="60" cy="60" r="52"/></svg><b id="ringPct">0%</b></div>
+    <div class="hero-text"><small>Realizat azi, fără TVA</small><div class="big"><b id="todayInt">0</b><span id="todayDec">,00</span><em>RON</em></div><small id="dailyRemaining"></small></div>
+    <svg class="ic chev"><use href="#i-chev"/></svg>
+  </article>
+  <div class="tiles">
+    <article class="group tile"><span class="icon orange"><svg class="ic"><use href="#i-flame"/></svg></span><div><small>Serie target</small><b id="streakValue">0 zile</b></div></article>
+    <article class="group tile"><span class="icon yellow"><svg class="ic"><use href="#i-star"/></svg></span><div><small>Record zilnic</small><b id="recordValue">0 RON</b></div></article>
+  </div>
+  <h2 class="head" id="monthLabel">Luna aceasta</h2>
+  <article class="group">
+    <div class="month-top"><div><b id="monthAmount">0 / 0 RON</b></div><span id="monthPercent" class="pill blue">0%</span></div>
+    <div class="bar-track"><i id="monthProgress"></i></div>
+    <div class="row"><span>Rămas</span><b id="monthRemaining">0 RON</b></div>
+    <div class="row"><span>Necesar pe zi</span><b id="monthNeeded">0 RON</b></div>
+    <div class="row"><span>Zile lucrătoare</span><b id="workDays">0</b></div>
+  </article>
+  <h2 class="head">Lucrările de azi <span id="todayCount" class="count">0</span></h2>
+  <div id="todayList" class="group list"></div>
+</section>
 
-      <div class="metrics-grid">
-        <article class="metric-card"><span class="metric-icon fire">↗</span><div><small>STREAK</small><strong id="streakValue">0 zile</strong></div></article>
-        <article class="metric-card"><span class="metric-icon trophy">★</span><div><small>RECORD</small><strong id="recordValue">0 RON</strong></div></article>
-      </div>
+<section id="view-stats" class="view">
+  <h1 class="large">Statistici</h1>
+  <article class="group pad"><small>Ultimele 7 zile</small><div class="big sm"><b id="sevenTotal">0 RON</b></div><small id="sevenAvg"></small><div id="weekChart"></div></article>
+  <article class="group"><div class="row"><span class="icon green"><svg class="ic"><use href="#i-chart"/></svg></span><div class="grow"><small>Ritm lunar</small><b id="paceInsight" class="wrap">Adaugă lucrări pentru a calcula ritmul.</b></div></div></article>
+  <h2 class="head">Luna curentă pe categorii</h2>
+  <div id="categoryList" class="group list"></div>
+</section>
 
-      <article class="card monthly-card">
-        <div class="card-head"><div><span class="eyebrow" id="monthLabel">TARGET LUNAR</span><h2 id="monthAmount">0 / 0 RON</h2></div><span id="monthPercent" class="percent-pill">0%</span></div>
-        <div class="progress-track slim"><div id="monthProgress" class="progress-fill monthly"></div></div>
-        <div class="month-details"><div><small>RĂMAS</small><strong id="monthRemaining">0 RON</strong></div><div><small>NECESAR / ZI</small><strong id="monthNeeded">0 RON</strong></div><div><small>ZILE LUCRĂTOARE</small><strong id="workDays">0</strong></div></div>
-      </article>
+<section id="view-history" class="view">
+  <h1 class="large">Istoric</h1>
+  <article class="group pad">
+    <div class="cal-head"><button id="calPrev" class="nav-btn" aria-label="Luna anterioară"><svg class="ic flip"><use href="#i-chev"/></svg></button><div><b id="calendarTitle"></b><small id="monthSum"></small></div><button id="calNext" class="nav-btn" aria-label="Luna următoare"><svg class="ic"><use href="#i-chev"/></svg></button></div>
+    <div class="weekdays"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
+    <div id="calendarGrid" class="cal-grid"></div>
+    <div class="legend"><span><i class="good"></i>Target atins</span><span><i class="mid"></i>50%+</span><span><i class="low"></i>Sub 50%</span></div>
+  </article>
+  <h2 class="head"><span id="selectedDate">Ziua selectată</span> <span id="selectedTotal" class="count">0 RON</span></h2>
+  <div id="selectedList" class="group list"></div>
+  <button id="addToDay" class="group link-row"><svg class="ic"><use href="#i-plus"/></svg>Adaugă lucrare în această zi</button>
+</section>
 
-      <div class="section-title"><div><span class="live-dot"></span><h2>Lucrările de astăzi</h2></div><span id="todayCount" class="count-pill">0</span></div>
-      <div id="todayList" class="job-list"></div>
-    </section>
+<section id="view-appointments" class="view">
+  <h1 class="large">Programări</h1>
+  <div id="apptList"></div>
+  <h2 class="head">Clienți <span id="apptCount" class="count">0</span></h2>
+  <label class="search"><svg class="ic"><use href="#i-search"/></svg><input id="clientSearch" type="search" placeholder="Caută nume, telefon sau locație" autocomplete="off"></label>
+  <div id="clientsList" class="group list"></div>
+</section>
 
-    <section id="view-stats" class="view" aria-label="Statistici">
-      <div class="page-title"><span class="eyebrow">ANALIZĂ</span><h1>Statistici</h1><p>Vezi ritmul și sursele performanței.</p></div>
-      <article class="card"><div class="card-head"><div><span class="eyebrow">ULTIMELE 7 ZILE</span><h2 id="sevenTotal">0 RON</h2></div><span class="legend"><i></i> target</span></div><div id="weekChart" class="chart"></div></article>
-      <article class="card"><div class="card-head"><div><span class="eyebrow">LUNA CURENTĂ</span><h2>Pe categorii</h2></div></div><div id="categoryList" class="category-list"></div></article>
-      <article class="card insight-card"><span>RITM LUNAR</span><strong id="paceInsight">Adaugă lucrări pentru a calcula ritmul.</strong></article>
-    </section>
+<section id="view-settings" class="view">
+  <h1 class="large">Setări</h1>
+  <article class="group">
+    <button id="settingsTarget" class="row"><span class="grow">Target zilnic</span><span id="settingsTargetValue" class="muted"></span><svg class="ic chev"><use href="#i-chev"/></svg></button>
+    <label class="row"><span class="grow">Include sâmbăta în target lunar</span><input id="saturdayToggle" type="checkbox" class="switch"></label>
+    <div class="row"><span class="grow">Temă</span><div class="segmented" id="themeSeg"><button data-theme-choice="light">Light</button><button data-theme-choice="dark">Dark</button><button data-theme-choice="auto">Auto</button></div></div>
+  </article>
+  <h2 class="head">Date</h2>
+  <article class="group">
+    <button id="exportBtn" class="row"><span class="icon blue"><svg class="ic"><use href="#i-down"/></svg></span><span class="grow">Export backup</span></button>
+    <button id="importBtn" class="row"><span class="icon blue"><svg class="ic"><use href="#i-up"/></svg></span><span class="grow">Import backup</span></button>
+  </article>
+  <p class="foot">Exportă istoricul înainte de a schimba telefonul sau browserul. Datele sunt stocate doar pe acest dispozitiv.</p>
+  <input id="importInput" type="file" accept="application/json,.json" hidden>
+  <p class="foot center">Revizio 2.1.0</p>
+</section>
+</main>
 
-    <section id="view-history" class="view" aria-label="Istoric">
-      <div class="page-title"><span class="eyebrow">ISTORIC</span><h1>Calendar performanță</h1><p>Atinge o zi pentru detalii.</p></div>
-      <article class="card calendar-card"><div class="calendar-head"><button id="prevMonth" class="icon-btn">‹</button><strong id="calendarTitle"></strong><button id="nextMonth" class="icon-btn">›</button></div><div class="weekdays"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div><div id="calendarGrid" class="calendar-grid"></div><div class="calendar-legend"><span><i class="good"></i>Atins</span><span><i class="mid"></i>50%+</span><span><i class="low"></i>Sub 50%</span><span><i class="none"></i>Fără activitate</span></div></article>
-      <article id="dayDetails" class="card hidden"><div class="card-head"><div><span class="eyebrow">ZI SELECTATĂ</span><h2 id="selectedDate"></h2></div><strong id="selectedTotal">0 RON</strong></div><div id="selectedList" class="job-list compact"></div></article>
-    </section>
+<button id="addFab" class="fab"><svg class="ic"><use href="#i-plus"/></svg>Adaugă lucrare</button>
+<nav class="tabbar" aria-label="Navigare principală">
+  <button class="tab active" data-view="home"><svg class="ic"><use href="#i-home"/></svg><small>Acasă</small></button>
+  <button class="tab" data-view="stats"><svg class="ic"><use href="#i-chart"/></svg><small>Statistici</small></button>
+  <button class="tab" data-view="history"><svg class="ic"><use href="#i-cal"/></svg><small>Istoric</small></button>
+  <button class="tab" data-view="appointments"><svg class="ic"><use href="#i-clock"/></svg><small>Programări</small></button>
+  <button class="tab" data-view="settings"><svg class="ic"><use href="#i-set"/></svg><small>Setări</small></button>
+</nav>
 
-    <section id="view-appointments" class="view" aria-label="Programări">
-      <div class="page-title"><span class="eyebrow">CLIENȚI</span><h1>Programări</h1><p>Gestionează vizitele și refolosește datele clienților.</p></div>
-      <div class="appointment-actions"><button id="newAppointmentBtn" class="btn primary">+ Programare nouă</button><button id="existingClientBtn" class="btn secondary">Client existent</button></div>
-      <article class="card"><div class="card-head"><div><span class="eyebrow">URMĂTOARELE PROGRAMĂRI</span><h2 id="appointmentsHeading">Agenda</h2></div><span id="appointmentCount" class="count-pill">0</span></div><div id="appointmentsList" class="appointment-list"></div></article>
-      <article class="card"><div class="card-head"><div><span class="eyebrow">CLIENȚI SALVAȚI</span><h2>Clienți</h2></div></div><div class="search-box"><input id="clientSearch" type="search" placeholder="Caută după nume, telefon sau locație" autocomplete="off"></div><div id="clientsList" class="client-list"></div></article>
-    </section>
+<div id="backdrop" class="backdrop"></div>
+<section id="addSheet" class="sheet" role="dialog" aria-modal="true" aria-label="Adaugă lucrare">
+  <div class="sheet-top"><i class="grabber"></i><div class="sheet-head"><b>Adaugă lucrare</b><small id="addSub"></small></div></div>
+  <div id="serviceTabs" class="segmented wide"></div><div id="serviceList" class="group list"></div>
+</section>
+<section id="targetSheet" class="sheet" role="dialog" aria-modal="true" aria-label="Target zilnic">
+  <div class="sheet-top"><i class="grabber"></i><div class="sheet-head"><b>Target zilnic</b><small>Targetul lunar se recalculează automat</small></div></div>
+  <div class="group pad target-in"><input id="targetInput" type="number" inputmode="decimal" min="1" step="50"><span>RON</span></div>
+  <button id="saveTarget" class="btn">Salvează</button>
+</section>
+<section id="apptSheet" class="sheet" role="dialog" aria-modal="true" aria-label="Programare">
+  <div class="sheet-top"><i class="grabber"></i><div class="sheet-head"><b id="apptTitle">Programare nouă</b><small id="apptHint"></small></div></div>
+  <input id="apptClientId" type="hidden">
+  <div class="group">
+    <label class="row"><span>Nume</span><input id="apptName" type="text" autocomplete="name" placeholder="Nume și prenume"></label>
+    <label class="row"><span>Telefon</span><input id="apptPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="07xx xxx xxx"></label>
+    <label class="row"><span>Locație</span><input id="apptLocation" type="text" autocomplete="street-address" placeholder="Adresă / localitate"></label>
+  </div>
+  <div class="group">
+    <label class="row"><span>Data</span><input id="apptDate" type="date"></label>
+    <label class="row"><span>Ora</span><input id="apptTime" type="time"></label>
+    <div class="row"><span>Serviciu</span><div id="apptService" class="segmented"><button data-v="Montaj">Montaj</button><button data-v="Verificare">Verificare</button><button data-v="Revizie">Revizie</button></div></div>
+  </div>
+  <p id="apptError" class="error"></p>
+  <button id="saveAppt" class="btn">Salvează</button>
+</section>
 
-    <section id="view-settings" class="view" aria-label="Setări">
-      <div class="page-title"><span class="eyebrow">REVIZIO</span><h1>Setări</h1><p>Personalizează aplicația și protejează datele.</p></div>
-      <article class="card settings-list">
-        <button id="settingsTarget"><span><small>TARGET ZILNIC</small><strong id="settingsTargetValue">1.500 RON</strong></span><b>›</b></button>
-        <label><span><small>INCLUDE SÂMBĂTA</small><strong>În calculul targetului lunar</strong></span><input id="saturdayToggle" type="checkbox" class="switch"></label>
-        <div class="theme-row"><span><small>TEMĂ</small><strong>Aspectul aplicației</strong></span><div class="segmented"><button data-theme-choice="light">Light</button><button data-theme-choice="dark">Dark</button><button data-theme-choice="auto">Auto</button></div></div>
-      </article>
-      <article class="card"><div class="card-head"><div><span class="eyebrow">DATE</span><h2>Backup și restaurare</h2></div></div><p class="muted">Exportă istoricul înainte de schimbarea telefonului sau a browserului.</p><div class="two-buttons"><button id="exportBtn" class="btn secondary">Export backup</button><button id="importBtn" class="btn secondary">Import backup</button></div><input id="importInput" type="file" accept="application/json,.json" hidden></article>
-      <article class="version-card"><span>Revizio</span><strong>2.0.2 Appointments</strong></article>
-    </section>
-  </main>
-
-  <button id="fab" class="fab" aria-label="Adaugă lucrare"><span>+</span></button>
-  <nav class="tabbar safe-x" aria-label="Navigare principală">
-    <button class="tab active" data-view="home"><span>⌂</span><small>Acasă</small></button>
-    <button class="tab" data-view="stats"><span>▥</span><small>Statistici</small></button>
-    <div class="fab-space"></div>
-    <button class="tab" data-view="history"><span>▦</span><small>Istoric</small></button>
-    <button class="tab" data-view="appointments"><span>◷</span><small>Programări</small></button>
-    <button class="tab" data-view="settings"><span>⚙</span><small>Setări</small></button>
-  </nav>
-
-  <div id="sheetBackdrop" class="backdrop hidden"></div>
-  <section id="addSheet" class="bottom-sheet" aria-modal="true" role="dialog" aria-label="Adaugă lucrare"><div class="grabber"></div><div class="sheet-head"><div><span class="eyebrow">ADĂUGARE RAPIDĂ</span><h2>Alege serviciul</h2></div><button id="closeSheet" class="icon-btn">×</button></div><div id="serviceTabs" class="service-tabs"></div><div id="serviceList" class="service-list"></div></section>
-
-  <div id="targetModal" class="modal-wrap hidden"><div class="modal"><span class="eyebrow">OBIECTIV</span><h2>Target zilnic</h2><p>Targetul lunar se recalculează automat.</p><div class="input-suffix"><input id="targetInput" type="number" inputmode="decimal" min="1" step="50"><span>RON</span></div><div class="two-buttons"><button id="cancelTarget" class="btn secondary">Anulează</button><button id="saveTarget" class="btn primary">Salvează</button></div></div></div>
-  <div id="appointmentModal" class="modal-wrap hidden"><div class="modal appointment-modal"><span class="eyebrow" id="appointmentModalEyebrow">PROGRAMARE</span><h2 id="appointmentModalTitle">Programare nouă</h2><p id="appointmentModeHint">Datele clientului vor fi salvate automat.</p><input id="appointmentClientId" type="hidden"><div class="form-grid"><label><span>Nume client</span><input id="appointmentName" type="text" autocomplete="name" placeholder="Nume și prenume"></label><label><span>Locație</span><input id="appointmentLocation" type="text" autocomplete="street-address" placeholder="Adresă / localitate"></label><label><span>Telefon</span><input id="appointmentPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="07xx xxx xxx"></label><div class="form-two"><label><span>Data</span><input id="appointmentDate" type="date"></label><label><span>Ora</span><input id="appointmentTime" type="time"></label></div><label><span>Tip serviciu</span><select id="appointmentService"><option value="Montaj">Montaj</option><option value="Verificare">Verificare</option><option value="Revizie">Revizie</option></select></label></div><div class="two-buttons"><button id="cancelAppointment" class="btn secondary">Anulează</button><button id="saveAppointment" class="btn primary">Salvează</button></div></div></div>
-  <div id="clientPickerModal" class="modal-wrap hidden"><div class="modal"><span class="eyebrow">CLIENT EXISTENT</span><h2>Alege clientul</h2><p>Datele vor fi completate automat. Vei seta doar data și ora.</p><div class="search-box"><input id="clientPickerSearch" type="search" placeholder="Caută client"></div><div id="clientPickerList" class="client-picker-list"></div><button id="closeClientPicker" class="btn secondary full-btn">Închide</button></div></div>
-  <div id="undoToast" class="undo hidden"><span>Lucrare ștearsă</span><button id="undoBtn">ANULEAZĂ</button></div>
-  <script src="./app.js" defer></script>
+<div id="undoToast" class="toast"><span id="undoMsg"></span><button id="undoBtn">Anulează</button></div>
+<script src="./app.js" defer></script>
 </body>
 </html>
