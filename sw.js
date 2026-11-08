@@ -1,4 +1,4 @@
-const VERSION="2.1.0-ios-1",STATIC=`revizio-static-${VERSION}`,RUNTIME=`revizio-runtime-${VERSION}`;const SHELL=["./","./index.html","./app.css","./app.js","./manifest.json","./icon-192.png","./icon-512.png","./icon-maskable-512.png","./apple-touch-icon.png"];
+const VERSION="2.2.0-visit-1",STATIC=`revizio-static-${VERSION}`,RUNTIME=`revizio-runtime-${VERSION}`;const SHELL=["./","./index.html","./app.css","./app.js","./manifest.json","./icon-192.png","./icon-512.png","./icon-maskable-512.png","./apple-touch-icon.png"];
 self.addEventListener("install",e=>e.waitUntil(caches.open(STATIC).then(c=>c.addAll(SHELL))));
 self.addEventListener("message",e=>{if(e.data&&e.data.type==="SKIP_WAITING")self.skipWaiting()});
 self.addEventListener("activate",e=>e.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>![STATIC,RUNTIME].includes(k)&&k.startsWith("revizio-")).map(k=>caches.delete(k)))),self.clients.claim()])));

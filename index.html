@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Revizio">
 <meta name="format-detection" content="telephone=no">
-<meta name="revizio-version" content="2.1.0-ios">
+<meta name="revizio-version" content="2.2.0-visit">
 <title>Revizio</title>
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
@@ -32,6 +32,8 @@
 <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></symbol>
 <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v11m-4-4l4 4 4-4M5 20h14"/></symbol>
 <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 15V4m-4 4l4-4 4 4M5 20h14"/></symbol>
+<symbol id="i-card" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2.5"/><path d="M3 10h18"/></symbol>
+<symbol id="i-doc" viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/></symbol>
 </defs></svg>
 
 <div id="updateToast" class="banner hidden" role="status"><span><b>Actualizare disponibilă</b><small>Versiune nouă Revizio</small></span><button id="updateBtn">Actualizează</button></div>
@@ -86,6 +88,7 @@
 <section id="view-appointments" class="view">
   <h1 class="large">Programări</h1>
   <div id="apptList"></div>
+  <div id="payCards"></div>
   <h2 class="head">Clienți <span id="apptCount" class="count">0</span></h2>
   <label class="search"><svg class="ic"><use href="#i-search"/></svg><input id="clientSearch" type="search" placeholder="Caută nume, telefon sau locație" autocomplete="off"></label>
   <div id="clientsList" class="group list"></div>
@@ -105,7 +108,7 @@
   </article>
   <p class="foot">Exportă istoricul înainte de a schimba telefonul sau browserul. Datele sunt stocate doar pe acest dispozitiv.</p>
   <input id="importInput" type="file" accept="application/json,.json" hidden>
-  <p class="foot center">Revizio 2.1.0</p>
+  <p class="foot center">Revizio 2.2.0</p>
 </section>
 </main>
 
@@ -144,6 +147,15 @@
   <p id="apptError" class="error"></p>
   <button id="saveAppt" class="btn">Salvează</button>
 </section>
+
+<section id="visitSheet" class="sheet" role="dialog" aria-modal="true" aria-label="Vizită">
+  <div class="sheet-top"><i class="grabber"></i><div class="sheet-head"><b id="visitTitle">Vizită</b><small id="visitHint"></small></div></div>
+  <div id="visitTabs" class="segmented wide"></div><div id="visitServices" class="group list"></div>
+  <h2 class="head">În această vizită <span id="visitTotal" class="count">0,00 RON</span></h2>
+  <div id="visitLines" class="group list"></div>
+  <button id="finishVisit" class="btn">Finalizare</button>
+</section>
+<div id="payAlert" class="alert" role="alertdialog" aria-modal="true"><div class="alert-box"><b>Plată card?</b><small>Alege cum a plătit clientul.</small><div class="alert-btns"><button data-pay="invoice">Nu</button><button data-pay="card" class="strong">Da</button></div></div></div>
 
 <div id="undoToast" class="toast"><span id="undoMsg"></span><button id="undoBtn">Anulează</button></div>
 <script src="./app.js" defer></script>

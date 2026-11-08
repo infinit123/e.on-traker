@@ -1,5 +1,5 @@
 "use strict";
-const VERSION="2.1.0",VAT=1.21,KEY="revizio_app_state_v3";
+const VERSION="2.2.0",VAT=1.21,KEY="revizio_app_state_v3";
 const CATALOG={"Verificare":[["Verificare inspecție IU 1 PDA",190],["Verificare inspecție IU 2 PDA",230],["Verificare inspecție IU 3 PDA",300],["Verificare inspecție IU 4+ PDA",380]],"Revizie":[["Revizie inspecție IU 1 PDA",230],["Revizie inspecție IU 2 PDA",290],["Revizie inspecție IU 3 PDA",375],["Revizie inspecție IU 4+ PDA",480]],"Detectoare":[["Detector HD100 PRO Double Control",310],["Detector Homplex HD300 PRO",485]],"Servexpress":[["Servexpress",190,true]]};
 const CAT_COLOR={Verificare:"blue",Revizie:"green",Detectoare:"orange",Servexpress:"purple"};
 const AV_COLORS=["#007aff","#34c759","#ff9500","#af52de","#ff2d55","#5856d6","#00a3a3"];
@@ -50,7 +50,7 @@ function applyTheme(){
 
 /* ---------- shared row builders ---------- */
 const swipeRow=(inner,delAttr,extra="")=>`<div class="swipe"><button class="swipe-del" ${delAttr}>Șterge</button><div class="swipe-body" ${extra}>${inner}</div></div>`;
-function jobInner(x){const c=x.category||categoryFor(x.name);return`<span class="badge ${CAT_COLOR[c]}">${c[0]}</span><div class="grow"><strong>${esc(x.name)}</strong><small>${x.pricingMode==="integral"?"încasare integrală":"fără TVA"}</small></div><span class="amt">+${money(x.amountNoVat)}</span>`}
+function jobInner(x){const c=x.category||categoryFor(x.name);return`<span class="badge ${CAT_COLOR[c]}">${c[0]}</span><div class="grow"><strong>${esc(x.name)}</strong><small>${x.pricingMode==="integral"?"încasare integrală":"fără TVA"}${x.payment?" · "+(x.payment==="card"?"card":"factură"):""}</small></div><span class="amt">+${money(x.amountNoVat)}</span>`}
 const jobHTML=x=>swipeRow(jobInner(x),`data-del-job="${x.id}"`);
 
 /* ---------- Home ---------- */
@@ -120,17 +120,17 @@ function dayLabel(k){
   return diff===0?"Astăzi · "+base:diff===1?"Mâine · "+base:diff===-1?"Ieri · "+base:base;
 }
 function renderAppointments(){
-  const now=Date.now(),list=state.appointments.slice().sort((a,b)=>stamp(a)-stamp(b)).filter(a=>stamp(a)>=now-36e5);
+  const now=Date.now(),list=state.appointments.slice().sort((a,b)=>stamp(a)-stamp(b)).filter(a=>a.status==="active"||(a.status==="done"?a.date===key(new Date()):stamp(a)>=now-36e5));
   let h="",cur="";
   list.forEach(a=>{
     if(a.date!==cur){if(cur)h+="</div>";cur=a.date;h+=`<div class="appt-day">${dayLabel(a.date)}</div><div class="group list">`}
     const c=clientById(a.clientId)||a.clientSnapshot||{},tel=normalizePhone(c.phone);
-    const inner=`<span class="appt-time">${esc(a.time)}</span><div class="grow"><strong>${esc(c.name||"Client")}</strong><small>${esc(c.location||"")}</small><span class="appt-tag">${esc(a.service)}</span></div>${tel?`<a class="round" href="tel:${esc(tel)}" aria-label="Sună">${ic("phone")}</a>`:""}${c.location?`<a class="round nav" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.location)}" aria-label="Navighează">${ic("nav")}</a>`:""}`;
+    const inner=`<span class="appt-time">${esc(a.time)}</span><div class="grow"><strong>${esc(c.name||"Client")}</strong><small>${esc(c.location||"")}</small><span class="appt-tag">${esc(a.service)}</span>${a.status==="done"?`<small>Finalizată · ${a.payment==="card"?"card":"factură"}</small>`:`<button class="start-btn" data-visit="${a.id}">${a.status==="active"?"Continuă vizita":"Start vizită"}</button>`}</div>${tel?`<a class="round" href="tel:${esc(tel)}" aria-label="Sună">${ic("phone")}</a>`:""}${c.location?`<a class="round nav" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.location)}" aria-label="Navighează">${ic("nav")}</a>`:""}`;
     h+=swipeRow(inner,`data-del-appt="${a.id}"`,`data-edit-appt="${a.id}"`);
   });
   if(cur)h+="</div>";
   $("apptList").innerHTML=h||'<div class="group"><div class="empty">Nu ai programări viitoare.<br>Apasă + pentru a adăuga una.</div></div>';
-  renderClients($("clientSearch").value);
+  renderClients($("clientSearch").value);renderPayCards();
 }
 function renderClients(f=""){
   const q=f.trim().toLowerCase(),list=state.clients.slice().sort((a,b)=>a.name.localeCompare(b.name,"ro")).filter(c=>!q||[c.name,c.location,c.phone].some(v=>String(v||"").toLowerCase().includes(q)));
@@ -164,9 +164,10 @@ function deleteAppointment(id){
 }
 
 /* ---------- Executions ---------- */
+const mkExec=(name,price,integral,date,ts)=>({id:uid("e"),name,priceVat:price,amountNoVat:integral?price:price/VAT,date,timestamp:ts,pricingMode:integral?"integral":"fara_tva",category:categoryFor(name)});
 function addExecution(name,price,integral=false){
   const today=key(new Date()),date=addDate||today,before=totalFor(today),best=Math.max(0,...Object.values(totals()));
-  state.executions.push({id:uid("e"),name,priceVat:price,amountNoVat:integral?price:price/VAT,date,timestamp:addDate?dateOf(date).getTime():Date.now(),pricingMode:integral?"integral":"fara_tva",category:categoryFor(name)});
+  state.executions.push(mkExec(name,price,integral,date,addDate?dateOf(date).getTime():Date.now()));
   save();closeSheets();render();navigator.vibrate?.(18);
   const after=totalFor(today);
   if(date===today&&((before<state.target&&after>=state.target)||(best>0&&before<=best&&after>best)))celebrate();
@@ -176,6 +177,41 @@ function deleteExecution(id){
   save();render();showUndo("Lucrare ștearsă",()=>{state.executions.splice(i,0,item);save();render()});
 }
 const celebrate=()=>$("hero").animate([{transform:"scale(1)"},{transform:"scale(1.03)"},{transform:"scale(1)"}],{duration:420,easing:"ease-out"});
+
+/* ---------- Visit ---------- */
+let visitId=null,visitTab="Verificare";
+const visitAppt=()=>state.appointments.find(a=>a.id===visitId);
+function openVisit(id){
+  const a=state.appointments.find(x=>x.id===id);if(!a)return;
+  if(a.status!=="active"){a.status="active";a.visit=[];a.startedAt=Date.now();save();render()}
+  visitId=id;const c=clientById(a.clientId)||a.clientSnapshot||{};
+  $("visitTitle").textContent=c.name||"Vizită";$("visitHint").textContent=[c.location,a.service].filter(Boolean).join(" · ");
+  renderVisit();openSheet("visitSheet");
+}
+function renderVisit(){
+  const a=visitAppt();if(!a)return;const lines=a.visit||[];
+  $("visitTabs").innerHTML=Object.keys(CATALOG).map(c=>`<button class="${c===visitTab?"active":""}" data-vtab="${c}">${c}</button>`).join("");
+  $("visitServices").innerHTML=CATALOG[visitTab].map((x,i)=>`<button class="svc" data-vadd="${i}"><span class="badge ${CAT_COLOR[visitTab]}">${visitTab[0]}</span><div class="grow"><strong>${x[0]}</strong></div><b>+ ${x[1]} RON</b></button>`).join("");
+  $("visitTotal").textContent=money(lines.reduce((s,x)=>s+x.amount,0))+" RON";
+  $("visitLines").innerHTML=lines.length?lines.map((x,i)=>`<button class="svc" data-vrm="${i}"><span class="badge ${CAT_COLOR[x.category]}">${x.category[0]}</span><div class="grow"><strong>${esc(x.name)}</strong><small>Atinge pentru a elimina</small></div><b>${money(x.amount)}</b></button>`).join(""):'<div class="empty">Alege serviciile efectuate.</div>';
+  $("finishVisit").disabled=!lines.length;
+}
+function finalizeVisit(method){
+  const a=visitAppt();if(!a||!(a.visit||[]).length)return;
+  const c=clientById(a.clientId)||a.clientSnapshot||{},d=key(new Date());
+  a.visit.forEach(l=>state.executions.push({...mkExec(l.name,l.price,l.integral,d,Date.now()),payment:method,apptId:a.id,client:c.name||""}));
+  Object.assign(a,{status:"done",payment:method,finishedAt:Date.now(),visit:[]});
+  save();closeSheets();visitId=null;render();toast(method==="card"?"Vizită finalizată · plată card":"Vizită finalizată · plată pe factură");
+}
+function renderPayCards(){
+  const n=new Date(),items=monthItems(n.getFullYear(),n.getMonth());
+  const card=(title,method,icon,color)=>{
+    const g={};items.filter(x=>x.payment===method).forEach(x=>(g[x.apptId||x.id]??=[]).push(x));
+    const rows=Object.values(g).sort((a,b)=>b[0].timestamp-a[0].timestamp),total=rows.flat().reduce((s,x)=>s+x.amountNoVat,0);
+    return`<h2 class="head">${title}<span class="count">${money(total)} RON</span></h2><div class="group list">${rows.length?rows.map(r=>`<div class="row pay-row"><span class="icon ${color}">${ic(icon)}</span><div class="grow"><b>${esc(r[0].client||"Client")}</b><small>${dateOf(r[0].date).toLocaleDateString("ro-RO",{day:"numeric",month:"short"})} · ${esc(r.map(x=>x.name).join(", "))}</small></div><b>${money(r.reduce((s,x)=>s+x.amountNoVat,0))}</b></div>`).join(""):'<div class="empty">Nicio vizită în luna aceasta.</div>'}</div>`;
+  };
+  $("payCards").innerHTML=card("Plată card","card","card","blue")+card("Plată pe factură","invoice","doc","orange");
+}
 
 /* ---------- toast / undo ---------- */
 function showUndo(msg,fn){undoFn=fn;$("undoMsg").textContent=msg;$("undoBtn").classList.toggle("hidden",!fn);$("undoToast").classList.add("show");clearTimeout(undoTimer);undoTimer=setTimeout(()=>{undoFn=null;$("undoToast").classList.remove("show")},5000)}
@@ -269,14 +305,20 @@ function events(){
   document.querySelectorAll("[data-theme-choice]").forEach(b=>b.onclick=()=>{state.theme=b.dataset.themeChoice;save();applyTheme()});
   $("exportBtn").onclick=exportBackup;$("importBtn").onclick=()=>$("importInput").click();
   $("importInput").onchange=e=>{if(e.target.files[0])importBackup(e.target.files[0]);e.target.value=""};
+  $("visitTabs").onclick=e=>{const b=e.target.closest("[data-vtab]");if(b){visitTab=b.dataset.vtab;renderVisit()}};
+  $("visitServices").onclick=e=>{const b=e.target.closest("[data-vadd]"),a=visitAppt();if(!b||!a)return;const x=CATALOG[visitTab][+b.dataset.vadd];(a.visit=a.visit||[]).push({name:x[0],price:x[1],integral:!!x[2],category:visitTab,amount:x[2]?x[1]:x[1]/VAT});save();renderVisit();navigator.vibrate?.(12)};
+  $("visitLines").onclick=e=>{const b=e.target.closest("[data-vrm]"),a=visitAppt();if(b&&a){a.visit.splice(+b.dataset.vrm,1);save();renderVisit()}};
+  $("finishVisit").onclick=()=>$("payAlert").classList.add("show");
+  $("payAlert").onclick=e=>{const b=e.target.closest("[data-pay]");if(b){$("payAlert").classList.remove("show");finalizeVisit(b.dataset.pay)}else if(e.target.id==="payAlert")$("payAlert").classList.remove("show")};
   $("undoBtn").onclick=()=>{if(undoFn)undoFn();undoFn=null;$("undoToast").classList.remove("show")};
   document.body.addEventListener("click",e=>{
     const t=e.target;
     const dj=t.closest("[data-del-job]");if(dj)return deleteExecution(dj.dataset.delJob);
     const da=t.closest("[data-del-appt]");if(da)return deleteAppointment(da.dataset.delAppt);
     const day=t.closest("[data-day]");if(day){selectedDay=day.dataset.day;return renderHistory()}
+    const vb=t.closest("[data-visit]");if(vb)return openVisit(vb.dataset.visit);
     const body=t.closest("[data-edit-appt]");
-    if(body&&!t.closest("a")&&!body.dataset.dragged){if(body.classList.contains("open"))return closeSwipes();const a=state.appointments.find(x=>x.id===body.dataset.editAppt);if(a)openAppointment(null,a);return}
+    if(body&&!t.closest("a,button")&&!body.dataset.dragged){if(body.classList.contains("open"))return closeSwipes();const a=state.appointments.find(x=>x.id===body.dataset.editAppt);if(a)openAppointment(null,a);return}
     const cl=t.closest("[data-client]");if(cl){const c=clientById(cl.dataset.client);if(c)openAppointment(c)}
   });
   matchMedia("(prefers-color-scheme:dark)").addEventListener?.("change",()=>{if(state.theme==="auto")applyTheme()});

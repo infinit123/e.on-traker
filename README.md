@@ -1,4 +1,4 @@
-# Revizio 2.1.0 (iOS redesign)
+# Revizio 2.2.0 (iOS redesign)
 
 Interfață redesenată în stil iOS: titluri mari, liste grupate, tab bar translucid, bottom sheets, swipe-to-delete, inel de progres.
 Fără Tailwind, Google Fonts sau alte dependențe CDN (font de sistem: SF Pro pe iPhone).
@@ -17,3 +17,7 @@ Schimbă `VERSION` din `sw.js` la fiecare versiune; aplicația afișează banner
 - Ritm lunar calculat până ieri (înainte includea câștigul de azi, dar nu și targetul de azi)
 - Temă Auto urmărește sistemul; zi nouă detectată la revenirea în aplicație
 - Import backup validat și cu confirmare; erori de salvare afișate
+
+## Vizite (2.2.0)
+Programări → „Start vizită” → alegi serviciile (poți adăuga mai multe) → „Finalizare” → „Plată card?” Da/Nu.
+Serviciile intră în totalul zilei. Plățile apar în cardurile „Plată card” și „Plată pe factură” (luna curentă), grupate pe client.
